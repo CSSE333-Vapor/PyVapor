@@ -1,7 +1,5 @@
 import db
 
 
-DB = db.DBConnection()
 
-print(DB.connect())
-
+db.add_user('abc3', 'aaa')
