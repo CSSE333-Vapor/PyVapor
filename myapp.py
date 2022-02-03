@@ -30,6 +30,7 @@ def hello_world():
 
 # 接收参数，并返回json数据
 @app.route('/signUp', methods=['GET', 'POST'])
+
 @cross_origin()
 def sign_up():
     data = request.get_json()

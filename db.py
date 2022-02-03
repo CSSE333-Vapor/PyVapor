@@ -27,14 +27,73 @@ def add_user(name, password):
                 return False
 
 
-def add_user1(name, password):
+def update_user(name, password):
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
-                cursor.callproc('addUser', (name, password,))
+                cursor.callproc('updateUser', (name, password,))
                 conn.commit()
                 return True
             except pymssql.DatabaseError:
                 print("Error in adding the User")
                 return False
 
+
+def add_game(name, releaseDate, price, description, download, version):
+    with db_connect() as conn:
+        with conn.cursor(as_dict=True) as cursor:
+            try:
+                cursor.callproc('addGame', (version, releaseDate, price, description, download, name))
+                conn.commit()
+                return True
+            except pymssql.DatabaseError:
+                print("Error in adding the User")
+                return False
+
+
+def add_UserOwnGames(uID, gID):  # 还需要处理返回值
+    with db_connect() as conn:
+        with conn.cursor(as_dict=True) as cursor:
+            try:
+                cursor.callproc('addUserOwnGame', (uID, gID))
+                conn.commit()
+                return True
+            except pymssql.DatabaseError:
+                print("Error in adding the User")
+                return False
+
+
+def add_Review(uID, gID, title, content, rating):  # 还需要处理返回值
+    with db_connect() as conn:
+        with conn.cursor(as_dict=True) as cursor:
+            try:
+                cursor.callproc('addReview', (uID, gID, title, content, rating))
+                conn.commit()
+                return True
+            except pymssql.DatabaseError:
+                print("Error in adding the User")
+                return False
+
+
+def update_Review(rID, title, content, rating):  # 还需要处理返回值
+    with db_connect() as conn:
+        with conn.cursor(as_dict=True) as cursor:
+            try:
+                cursor.callproc('updateReview', (rID, title, content, rating))
+                conn.commit()
+                return True
+            except pymssql.DatabaseError:
+                print("Error in adding the User")
+                return False
+
+
+def get_AllGames():  # 还需要处理返回值
+    with db_connect() as conn:
+        with conn.cursor(as_dict=True) as cursor:
+            try:
+                cursor.callproc('getAllGames', ())
+                conn.commit()
+                return True
+            except pymssql.DatabaseError:
+                print("Error in adding the User")
+                return False
