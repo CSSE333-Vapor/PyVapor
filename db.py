@@ -25,3 +25,16 @@ def add_user(name, password):
             except pymssql.DatabaseError:
                 print("Error in adding the User")
                 return False
+
+
+def add_user1(name, password):
+    with db_connect() as conn:
+        with conn.cursor(as_dict=True) as cursor:
+            try:
+                cursor.callproc('addUser', (name, password,))
+                conn.commit()
+                return True
+            except pymssql.DatabaseError:
+                print("Error in adding the User")
+                return False
+

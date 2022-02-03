@@ -2,7 +2,7 @@
  * @fileoverview
  * Provides the JavaScript interactions for all pages.
  *
- * @author 
+ * @author Zeen Wang
  * S1G2 CSSE333
  */
 
@@ -11,7 +11,7 @@ var rhit = rhit || {};
 
 /** globals */
 rhit.variableName = "";
-
+rhit.url = "http://127.0.0.1:8080/"
 rhit.userManager = null;
 
 /** function and class syntax examples */
@@ -19,14 +19,44 @@ rhit.functionName = function () {
 	/** function body */
 };
 
+
 /* Controls the login page (login.html) */
 rhit.LoginPageController = class {
 	constructor() {
-		
-		submitSignIn
+		console.log("LoginPage");
+		document.querySelector("#submitSignIn").onclick = (params) => {
+			const username = document.querySelector("#username").value
+			const password = document.querySelector("#password").value
+			console.log(rhit.url + 'signUp');
+			fetch(rhit.url + 'signUp', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						'username': username,
+						'hash': password
+					})
+				})
+				.then(response => {
+					console.log("status is " + response.status);
+					return response.json();
+				})
+				.then(data => {
+					console.log(data);
+					if (data.status == 0) {
+						rhit.userManager.signIn(username);	
+						console.log("Successful SignUp");
+						console.log("Redirecting");
+						window.location.href = '/home.html';
+					}
+				})
+				.catch(error => console.log("Request failed", error));
+
+		}
 	}
 
-	
+
 }
 
 /* Controls the homepage (index.html) */
@@ -39,8 +69,8 @@ rhit.HomePageController = class {
 
 	}
 
-	get isSignedIn(){
-		
+	get isSignedIn() {
+
 	}
 }
 
@@ -62,8 +92,8 @@ rhit.UserManager = class {
 		this._user = null;
 	}
 
-	signIn() {
-
+	signIn(username) {
+		this._user = username;
 	}
 
 	signOut() {
