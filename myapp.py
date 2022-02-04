@@ -42,10 +42,10 @@ def sign_up():
             msg = "Error: Username or Hash Can't be NULL"
             response = jsonify({'status': status, 'msg': msg})
         else:
-            db.add_user(username, password)
+            uid = db.add_user(username, password)
             status = 0
             msg = "Success"
-            response = jsonify({'status': status, 'msg': msg})
+            response = jsonify({'status': status, 'msg': msg, 'content': uid})
         return response
     except KeyError:
         status = -1
@@ -102,10 +102,10 @@ def add_game():  # 添加游戏
             response = jsonify({'status': status, 'msg': msg})
         else:
             result = db.add_game(name, release_date, price, description, download, version)
-            if result == 0:  # 结果为0添加成功
+            if result != 1:  # 结果为0添加成功
                 status = 0
                 msg = "Add game successfully"
-                response = jsonify({'status': status, 'msg': msg})
+                response = jsonify({'status': status, 'msg': msg, 'content': result})
             else:
                 status = 2  # 添加游戏结果为2添加失败
                 msg = "Add game failed"
@@ -120,7 +120,7 @@ def add_game():  # 添加游戏
 
 @app.route('/addUserGame', methods=['GET', 'POST'])
 @cross_origin()
-def add_game():  # 添加游戏
+def add_game_toUser():  # 添加游戏
     data = request.get_json()
     try:
         uID = data['uid']
@@ -131,7 +131,7 @@ def add_game():  # 添加游戏
             msg = "Error: None of the input Can be NULL"
             response = jsonify({'status': status, 'msg': msg})
         else:
-            result = db.add_game(uID, gID)
+            result = db.add_UserOwnGames(uID, gID)
             if result == 0:  # 结果为0添加成功
                 status = 0
                 msg = "Add game to User successfully"
@@ -166,14 +166,124 @@ def add_review():  # 添加游戏
             response = jsonify({'status': status, 'msg': msg})
         else:
             result = db.add_Review(uID, gID, title, content, rating)
-            if result == 0:  # 结果为0添加成功
+            if result != 1:  # 结果为0添加成功
                 status = 0
                 msg = "Add review successfully"
-                response = jsonify({'status': status, 'msg': msg})
+                response = jsonify({'status': status, 'msg': msg, 'content': result})
             else:
                 status = 2  # 添加游戏结果为2添加失败
                 msg = "Add review  failed"
                 response = jsonify({'status': status, 'msg': msg})
+        return response
+    except KeyError:
+        status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+
+
+@app.route('/addReview', methods=['GET', 'POST'])
+@cross_origin()
+def update_review():  # 添加游戏
+    data = request.get_json()
+    try:
+        rID = data['rID']
+        title = data['title']
+        content = data['content']
+        rating = data['rating']
+        print(rID, content)
+        if rID == '':  # 非空检查
+            status = 1
+            msg = "Error: review ID Cannot be NULL"
+            response = jsonify({'status': status, 'msg': msg})
+        else:
+            result = db.update_Review(rID, title, content, rating)
+            if result != 0:  # 结果为0添加成功
+                status = 0
+                msg = "update review successfully"
+                response = jsonify({'status': status, 'msg': msg})
+            else:
+                status = 2  # 添加游戏结果为2添加失败
+                msg = "update review  failed"
+                response = jsonify({'status': status, 'msg': msg})
+        return response
+    except KeyError:
+        status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+
+
+@app.route('/getAllGames', methods=['GET', 'POST'])
+@cross_origin()
+def getAllGame():
+    data = request.get_json()
+    page = data['page']
+    max = data['max']
+    try:
+        result = db.get_AllGames(page, max)
+        if result != 1:
+            status = 0
+            msg = "Success"
+            response = jsonify({'status': status, 'msg': msg, 'content': result})
+
+        else:
+            status = 1
+            msg = "failed "
+            response = jsonify({'status': status, 'msg': msg})
+        return response
+    except KeyError:
+        status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+
+
+@app.route('/deleteGame', methods=['GET', 'POST'])
+@cross_origin()
+def deleteGame():
+    data = request.get_json()
+    gid = data['gid']
+
+    try:
+        if gid == '':  # 非空检查
+            status = 2
+            msg = "Error: game ID Cannot be NULL"
+            response = jsonify({'status': status, 'msg': msg})
+        else:
+            result = db.delete_Game(gid)
+            if result != 1:
+                status = 0
+                msg = "Success delete game"
+                response = jsonify({'status': status, 'msg': msg})
+            else:
+                status = 1
+                msg = "failed delete game "
+                response = jsonify({'status': status, 'msg': msg})
+        return response
+    except KeyError:
+        status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+
+
+@app.route('/getUserGames', methods=['GET', 'POST'])
+@cross_origin()
+def getUserGame():
+    data = request.get_json()
+    uid = data['uid']
+    try:
+        result = db.getUsersGames(uid)
+        if result != 1:
+            status = 0
+            msg = "Success"
+            response = jsonify({'status': status, 'msg': msg, 'content': result})
+
+        else:
+            status = 1
+            msg = "failed to get user's game"
+            response = jsonify({'status': status, 'msg': msg})
         return response
     except KeyError:
         status = -1
