@@ -8,9 +8,8 @@
 """
 from flask import Flask, render_template, url_for, request, json, jsonify
 from flask_cors import cross_origin
-
 import db
-import vapor
+
 
 app = Flask(__name__)
 # 设置编码
@@ -18,6 +17,7 @@ app.config['JSON_AS_ASCII'] = False
 
 
 @app.route('/', methods=['GET', 'POST'])
+@cross_origin()
 def hello_world():
     # data0 = request.get_json()
     # print(data0)
@@ -45,16 +45,45 @@ def sign_up():
             uid = db.add_user(username, password)
             status = 0
             msg = "Success"
-            response = jsonify({'status': status, 'msg': msg, 'content': uid})
+            response = jsonify({'status': status, 'msg': msg, 'uid': uid})
         return response
-    except KeyError:
+    except (KeyError, TypeError):
         status = -1
         msg = "Error: Wrong Parameter!"
         response = jsonify({'status': status, 'msg': msg})
         return response
+    except ValueError as e:
+        status = 2
+        msg = str(e)
+        response = jsonify({'status': status, 'msg': msg})
+        return response
 
 
-@app.route('/logIn', methods=['GET', 'POST'])
+@app.route('/getSalt', methods=['GET', 'POST'])
+@cross_origin()
+def get_salt():
+    data = request.get_json()
+    try:
+        username = data['username']
+        print(username)
+        if username == '':
+            status = 1
+            msg = "Error: Username Can't be NULL"
+            response = jsonify({'status': status, 'msg': msg})
+        else:
+            result = db.sign_in(username)['salt']
+            status = 0
+            msg = "Success"
+            response = jsonify({'status': status, 'msg': msg, 'salt': result})
+        return response
+    except (KeyError, TypeError):
+        status = 2
+        msg = str(e)
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+
+
+@app.route('/login', methods=['GET', 'POST'])
 @cross_origin()
 def sign_in():
     data = request.get_json()
@@ -67,19 +96,27 @@ def sign_in():
             msg = "Error: Username or Hash Can't be NULL"
             response = jsonify({'status': status, 'msg': msg})
         else:
-            result = db.sign_in(username, password)
-            if result == 0:
+            result = db.sign_in(username)
+            print(result['hash'])
+            print(password)
+            print(result['uid'])
+            if password == result['hash']:
                 status = 0
                 msg = "Success"
-                response = jsonify({'status': status, 'msg': msg})
+                response = jsonify({'status': status, 'msg': msg, 'uid': result['uid']})
             else:
                 status = 2
                 msg = "Login Failed"
                 response = jsonify({'status': status, 'msg': msg})
         return response
-    except KeyError:
+    except (KeyError, TypeError):
         status = -1
         msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+    except ValueError:
+        status = -1
+        msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
 
@@ -117,6 +154,62 @@ def add_game():  # 添加游戏
         response = jsonify({'status': status, 'msg': msg})
         return response
 
+
+@app.route('/getAllGames', methods=['GET', 'POST'])
+@cross_origin()
+def get_all_game():
+    data = request.get_json()
+    try:
+        page_num = data['pageNum']
+        max_num = data['maxNum']
+        result = db.get_all_games(page_num, max_num)
+        status = 0
+        msg = "Success"
+        response = jsonify({'status': status, 'msg': msg, 'games': result})
+        return response
+    except (KeyError, TypeError):
+        status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+    except ValueError as e:
+        status = 1
+        msg = str(e)
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+
+
+@app.route('/deleteGame', methods=['GET', 'POST'])
+@cross_origin()
+def delete_game():
+    data = request.get_json()
+    try:
+        gid = data['gid']
+        if gid == '':  # 非空检查
+            status = 2
+            msg = "Error: game ID Cannot be NULL"
+            response = jsonify({'status': status, 'msg': msg})
+        else:
+            result = db.delete_game(gid)
+            if result == 0:
+                status = 0
+                msg = "Success delete game"
+                response = jsonify({'status': status, 'msg': msg})
+            else:
+                status = 1
+                msg = "failed delete game "
+                response = jsonify({'status': status, 'msg': msg})
+        return response
+    except KeyError:
+        status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+    except ValueError as e:
+        status = 1
+        msg = str(e)
+        response = jsonify({'status': status, 'msg': msg})
+        return response
 
 @app.route('/addUserGame', methods=['GET', 'POST'])
 @cross_origin()
@@ -205,60 +298,6 @@ def update_review():  # 添加游戏
             else:
                 status = 2  # 添加游戏结果为2添加失败
                 msg = "update review  failed"
-                response = jsonify({'status': status, 'msg': msg})
-        return response
-    except KeyError:
-        status = -1
-        msg = "Error: Wrong Parameter!"
-        response = jsonify({'status': status, 'msg': msg})
-        return response
-
-
-@app.route('/getAllGames', methods=['GET', 'POST'])
-@cross_origin()
-def getAllGame():
-    data = request.get_json()
-    page = data['page']
-    max = data['max']
-    try:
-        result = db.get_AllGames(page, max)
-        if result != 1:
-            status = 0
-            msg = "Success"
-            response = jsonify({'status': status, 'msg': msg, 'content': result})
-
-        else:
-            status = 1
-            msg = "failed "
-            response = jsonify({'status': status, 'msg': msg})
-        return response
-    except KeyError:
-        status = -1
-        msg = "Error: Wrong Parameter!"
-        response = jsonify({'status': status, 'msg': msg})
-        return response
-
-
-@app.route('/deleteGame', methods=['GET', 'POST'])
-@cross_origin()
-def deleteGame():
-    data = request.get_json()
-    gid = data['gid']
-
-    try:
-        if gid == '':  # 非空检查
-            status = 2
-            msg = "Error: game ID Cannot be NULL"
-            response = jsonify({'status': status, 'msg': msg})
-        else:
-            result = db.delete_Game(gid)
-            if result != 1:
-                status = 0
-                msg = "Success delete game"
-                response = jsonify({'status': status, 'msg': msg})
-            else:
-                status = 1
-                msg = "failed delete game "
                 response = jsonify({'status': status, 'msg': msg})
         return response
     except KeyError:
