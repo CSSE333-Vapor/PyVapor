@@ -1,6 +1,6 @@
 import _scproxy
 import pymssql
-
+from pymssql import _mssql
 import config
 
 
@@ -19,12 +19,13 @@ def add_user(name, password):
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
-                cursor.callproc('addUser', (name, password,))
+                uid = pymssql.output(int)
+                result = cursor.callproc('addUser', [name, password, None, uid])
                 conn.commit()
-                return True
-            except pymssql.DatabaseError:
-                print("Error in adding the User")
-                return False
+                return result[3]
+            except pymssql.DatabaseError as e:
+                print(e)
+                return e
 
 
 def update_user(name, password):
@@ -91,9 +92,15 @@ def get_AllGames():  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
-                cursor.callproc('getAllGames', ())
+                cursor.callproc('getAllGames', (1, 2))
+
+                result = []
+                for row in cursor:
+                    result.append(row)
+
                 conn.commit()
-                return True
-            except pymssql.DatabaseError:
-                print("Error in adding the User")
+
+                return result
+            except pymssql.DatabaseError as e:
+                print(e)
                 return False

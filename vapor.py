@@ -1,4 +1,4 @@
 import db
 
 
-print('abc')
+abc = db.get_AllGames()
