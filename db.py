@@ -39,11 +39,11 @@ def update_user(name, password):
                 return False
 
 
-def add_game(name, releaseDate, price, description, download, version):
+def add_game(name, releasedate, price, description, download, version):
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
-                cursor.callproc('addGame', (version, releaseDate, price, description, download, name))
+                cursor.callproc('addGame', (version, releasedate, price, description, download, name))
                 conn.commit()
                 return True
             except pymssql.DatabaseError:
