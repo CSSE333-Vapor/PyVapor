@@ -790,11 +790,26 @@ rhit.initializePage = function () {
 /* Main */
 /** function and class syntax examples */
 rhit.main = function () {
-	console.log("Ready");
-	rhit.userManager = new this.UserManager();
+	// console.log("Ready");
+	// rhit.userManager = new this.UserManager();
 	rhit.requestAPI = new this.RequestAPI(rhit.url)
-	rhit.checkForRedirects();
-	rhit.initializePage();
+	// rhit.checkForRedirects();
+	// rhit.initializePage();
+	rhit.requestAPI.signIn('username', 'password').then(data => {
+		console.log(data);
+		console.log(data.status);
+		console.log(data.msg);
+		if (data.status == 0) {
+			//rhit.userManager.signIn(new rhit.User(data.uid, username));
+			console.log("Successful SignIn");
+			console.log("Redirecting");
+			window.location.href = '/index.html';
+		} else {
+			console.log("error")
+			//errorLabel.innerHTML = data.msg;
+		}
+	})
+	
 };
 
 rhit.main();

@@ -76,7 +76,7 @@ def get_salt():
             msg = "Success"
             response = jsonify({'status': status, 'msg': msg, 'salt': result})
         return response
-    except (KeyError, TypeError):
+    except (KeyError, TypeError) as e:
         status = 2
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
@@ -114,7 +114,7 @@ def sign_in():
         msg = "Error: Wrong Parameter!"
         response = jsonify({'status': status, 'msg': msg})
         return response
-    except ValueError:
+    except ValueError as e:
         status = -1
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})

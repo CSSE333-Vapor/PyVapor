@@ -1,4 +1,4 @@
-import _scproxy
+# import _scproxy
 import pymssql
 from pymssql import _mssql
 import config
@@ -83,6 +83,36 @@ def get_all_games(page, max_num):  # 还需要处理返回值
                 raise ValueError('Failed in getting the game info!')
 
 
+def get_all_review():  # 还需要处理返回值
+    with db_connect() as conn:
+        with conn.cursor(as_dict=True) as cursor:
+            try:
+                cursor.callproc('getAllReview', ())
+                result = []
+                for row in cursor:
+                    result.append(row)
+                conn.commit()
+                return result
+            except pymssql.DatabaseError as e:
+                print(e)
+                raise ValueError('Failed in getting the game info!')
+
+
+def get_user_review(uid):  # 还需要处理返回值
+    with db_connect() as conn:
+        with conn.cursor(as_dict=True) as cursor:
+            try:
+                cursor.callproc('getUserReview', (uid,))
+                result = []
+                for row in cursor:
+                    result.append(row)
+                conn.commit()
+                return result
+            except pymssql.DatabaseError as e:
+                print(e)
+                raise ValueError('Failed in getting the game info!')
+
+
 def delete_game(gid):  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
@@ -120,7 +150,7 @@ def add_review(uID, gID, title, content, rating):  # 还需要处理返回值
                 return 1
 
 
-def update_review(rID, title, content, rating):  # 还需要处理返回值
+def update_review(rID, title, content, rating):
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
@@ -132,16 +162,27 @@ def update_review(rID, title, content, rating):  # 还需要处理返回值
                 return 1
 
 
+def delete_review(rID):  # 还需要处理返回值
+    with db_connect() as conn:
+        with conn.cursor(as_dict=True) as cursor:
+            try:
+                cursor.callproc('deleteReview', (rID,))
+                conn.commit()
+                return 0
+            except pymssql.DatabaseError:
+                print("Error delete_review")
+                return 1
+
+
 def getUsersGames(uid):  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
-                cursor.callproc('getUserGames', (uid))
+                cursor.callproc('getUserGames', (uid,))
                 result = []
                 for row in cursor:
                     result.append(row)
                 conn.commit()
-
                 return result
             except pymssql.DatabaseError as e:
                 print(e)
