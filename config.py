@@ -9,5 +9,5 @@
 
 server = 'titan.csse.rose-hulman.edu'
 database = 'Vapor'
-username = 'wangz30'
-password = 'WZEwze2001'
+username = 'zhaoy10'
+password = 'Zyqsq20000103'
