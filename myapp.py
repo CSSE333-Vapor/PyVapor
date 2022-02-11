@@ -327,6 +327,27 @@ def getUserReview():
         return response
 
 
+@app.route('/getSpecificReview', methods=['GET', 'POST'])
+@cross_origin()
+def getSpecificReview():
+    data = request.get_json()
+    uid = data['uid']
+    gid = data['gid']
+    try:
+        result = db.getSpecificReview(uid, gid)
+
+        status = 0
+        msg = "Success"
+        response = jsonify({'status': status, 'msg': msg, 'content': result})
+
+        return response
+    except (KeyError, TypeError) as e:
+        status = -1
+        msg = str(e)
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+
+
 @app.route('/updateReview', methods=['GET', 'POST'])
 @cross_origin()
 def update_review():  #
@@ -379,6 +400,71 @@ def getUserGame():
     except KeyError:
         status = -1
         msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+
+
+@app.route('/addUserOwnGame', methods=['GET', 'POST'])
+@cross_origin()
+def addUserOwnGame():  # 添加游戏
+    data = request.get_json()
+    try:
+        uID = data['uid']
+        gID = data['gid']
+
+        if uID == '' or gID == '':  # 非空检查
+            status = 1
+            msg = "Error: None of the review input Can be NULL"
+            response = jsonify({'status': status, 'msg': msg})
+        else:
+            result = db.add_UserOwnGames(uID, gID)
+            if result == 0:  # 结果为0添加成功
+                status = 0
+                msg = "purchase game successfully"
+                response = jsonify({'status': status, 'msg': msg, 'content': result})
+            else:
+                status = 2  # 添加游戏结果为2添加失败
+                msg = "purchase game failed"
+                response = jsonify({'status': status, 'msg': msg})
+        return response
+    except (KeyError, TypeError) as e:
+        status = -1
+        msg = str(e)
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+
+
+@app.route('/deleteUserGame', methods=['GET', 'POST'])
+@cross_origin()
+def deleteUserGame():
+    data = request.get_json()
+    try:
+        uid = data['uid']
+        gid = data['gid']
+
+        if uid == '' or gid == '':  # 非空检查
+            status = 2
+            msg = "Error: input Cannot be NULL"
+            response = jsonify({'status': status, 'msg': msg})
+        else:
+            result = db.deleteUserGame(uid, gid)
+            if result == 0:
+                status = 0
+                msg = "Success delete user game"
+                response = jsonify({'status': status, 'msg': msg})
+            else:
+                status = 1
+                msg = "failed delete user game "
+                response = jsonify({'status': status, 'msg': msg})
+        return response
+    except KeyError:
+        status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+    except ValueError as e:
+        status = 1
+        msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
 

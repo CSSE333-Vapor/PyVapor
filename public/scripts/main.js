@@ -484,7 +484,65 @@ rhit.RequestAPI = class {
 			.catch(error => console.log("Request failed", error));
 	}
 
-	
+		
+	async addUserOwnGame(uid,gid) {
+		return fetch(this._url + 'addUserOwnGame', {
+				method: 'POST',
+				headers: this._headers,
+				body: JSON.stringify({
+					'uid': uid,
+					'gid': gid
+					
+				})
+			})
+			.then(response => {
+				console.log("status is " + response.status);
+				
+				return response.json();
+			})
+		
+			.catch(error => console.log("Request failed", error));
+	}
+
+	async getUserGames(uid) {
+		return fetch(this._url + 'getUserGames', {
+				method: 'POST',
+				headers: this._headers,
+				body: JSON.stringify({
+					'uid': uid
+					
+				})
+			})
+			.then(response => {
+				console.log("status is " + response.status);
+				return response.json();
+			})
+			// .then(data => {
+			// 	console.log(data);
+			// 	if (data.status == 0) {
+			// 		return data.games;
+			// 	} else {
+
+			// 	}
+			// })
+			.catch(error => console.log("Request failed", error));
+	}
+
+	async deleteUserGame(uid,gid) {
+		return fetch(this._url + 'deleteUserGame', {
+				method: 'POST',
+				headers: this._headers,
+				body: JSON.stringify({
+					'uid': uid,
+					'gid': gid
+				})
+			})
+			.then(response => {
+				console.log("status is " + response.status);
+				return response.json();
+			})
+			.catch(error => console.log("Request failed", error));
+	}	
 
 
 	async deleteGame(gid) {
@@ -509,6 +567,21 @@ rhit.RequestAPI = class {
 				headers: this._headers,
 				body: JSON.stringify({
 					'uid': uid
+				})
+			})
+			.then(response => {
+				console.log("status is " + response.status);
+				return response.json();
+			})
+			.catch(error => console.log("Request failed", error));
+	}
+	async getSpecificReview(uid,gid) {
+		return fetch(this._url + 'getSpecificReview', {
+				method: 'POST',
+				headers: this._headers,
+				body: JSON.stringify({
+					'uid': uid,
+					'gid': gid
 				})
 			})
 			.then(response => {
@@ -869,7 +942,7 @@ rhit.main = function () {
 	rhit.requestAPI = new this.RequestAPI(rhit.url)
 	// rhit.checkForRedirects();
 	// rhit.initializePage();
-	rhit.requestAPI.updateReview(3,'testUpdate1','testupdate1',4).then(data => {
+	rhit.requestAPI.addUserOwnGame(1,3).then(data => {
 		console.log(data);
 		console.log(data.status);
 		console.log(data.msg);
