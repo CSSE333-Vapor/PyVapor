@@ -484,12 +484,72 @@ rhit.RequestAPI = class {
 			.catch(error => console.log("Request failed", error));
 	}
 
+	
+
+
 	async deleteGame(gid) {
 		return fetch(this._url + 'deleteGame', {
 				method: 'POST',
 				headers: this._headers,
 				body: JSON.stringify({
 					'gid': gid
+				})
+			})
+			.then(response => {
+				console.log("status is " + response.status);
+				return response.json();
+			})
+			.catch(error => console.log("Request failed", error));
+	}
+
+
+	async getUserReview(uid) {
+		return fetch(this._url + 'getUserReview', {
+				method: 'POST',
+				headers: this._headers,
+				body: JSON.stringify({
+					'uid': uid
+				})
+			})
+			.then(response => {
+				console.log("status is " + response.status);
+				return response.json();
+			})
+			.catch(error => console.log("Request failed", error));
+	}
+	
+	async addReview(uid,gid,title,content,rating) {
+		return fetch(this._url + 'addReview', {
+				method: 'POST',
+				headers: this._headers,
+				body: JSON.stringify({
+					'uid': uid,
+					'gid': gid,
+					'title': title,
+					'content': content,
+					'rating': rating,
+				})
+			})
+			.then(response => {
+				console.log("status is " + response.status);
+				
+				return response.json();
+			})
+			// .then(data => {
+			// 	console.log(data);
+			// 	if (data.status == 0) {
+			// 		return data.content;
+			// 	} else {
+			// 	}
+			// })
+			.catch(error => console.log("Request failed", error));
+	}
+	async deleteReview(rid) {
+		return fetch(this._url + 'deleteReview', {
+				method: 'POST',
+				headers: this._headers,
+				body: JSON.stringify({
+					'rid': rid
 				})
 			})
 			.then(response => {
@@ -795,15 +855,15 @@ rhit.main = function () {
 	rhit.requestAPI = new this.RequestAPI(rhit.url)
 	// rhit.checkForRedirects();
 	// rhit.initializePage();
-	rhit.requestAPI.signIn('username', 'password').then(data => {
+	rhit.requestAPI.addReview(1,1,'test2','test2',4).then(data => {
 		console.log(data);
 		console.log(data.status);
 		console.log(data.msg);
 		if (data.status == 0) {
 			//rhit.userManager.signIn(new rhit.User(data.uid, username));
-			console.log("Successful SignIn");
-			console.log("Redirecting");
-			window.location.href = '/index.html';
+			console.log("status=0");
+			// console.log("Redirecting");
+			// window.location.href = '/index.html';
 		} else {
 			console.log("error")
 			//errorLabel.innerHTML = data.msg;

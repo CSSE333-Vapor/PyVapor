@@ -10,7 +10,6 @@ from flask import Flask, render_template, url_for, request, json, jsonify
 from flask_cors import cross_origin
 import db
 
-
 app = Flask(__name__)
 # 设置编码
 app.config['JSON_AS_ASCII'] = False
@@ -97,9 +96,9 @@ def sign_in():
             response = jsonify({'status': status, 'msg': msg})
         else:
             result = db.sign_in(username)
-            print(result['hash'])
-            print(password)
-            print(result['uid'])
+            # print(result['hash'])
+            # print(password)
+            # print(result['uid'])
             if password == result['hash']:
                 status = 0
                 msg = "Success"
@@ -211,6 +210,7 @@ def delete_game():
         response = jsonify({'status': status, 'msg': msg})
         return response
 
+
 @app.route('/addUserGame', methods=['GET', 'POST'])
 @cross_origin()
 def add_game_toUser():  # 添加游戏
@@ -246,9 +246,8 @@ def add_game_toUser():  # 添加游戏
 def add_review():  # 添加游戏
     data = request.get_json()
     try:
-
         uID = data['uid']
-        gID = data['gID']
+        gID = data['gid']
         title = data['title']
         content = data['content']
         rating = data['rating']
@@ -258,7 +257,7 @@ def add_review():  # 添加游戏
             msg = "Error: None of the review input Can be NULL"
             response = jsonify({'status': status, 'msg': msg})
         else:
-            result = db.add_Review(uID, gID, title, content, rating)
+            result = db.add_review(uID, gID, title, content, rating)
             if result != 1:  # 结果为0添加成功
                 status = 0
                 msg = "Add review successfully"
@@ -268,14 +267,67 @@ def add_review():  # 添加游戏
                 msg = "Add review  failed"
                 response = jsonify({'status': status, 'msg': msg})
         return response
+    except (KeyError, TypeError) as e:
+        status = -1
+        msg = str(e)
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+
+
+@app.route('/deleteReview', methods=['GET', 'POST'])
+@cross_origin()
+def delete_review():
+    data = request.get_json()
+    try:
+        rid = data['rid']
+        if rid == '':  # 非空检查
+            status = 2
+            msg = "Error: uerID Cannot be NULL"
+            response = jsonify({'status': status, 'msg': msg})
+        else:
+            result = db.delete_review(rid)
+            if result == 0:
+                status = 0
+                msg = "Success delete review"
+                response = jsonify({'status': status, 'msg': msg})
+            else:
+                status = 1
+                msg = "failed delete review "
+                response = jsonify({'status': status, 'msg': msg})
+        return response
     except KeyError:
         status = -1
         msg = "Error: Wrong Parameter!"
         response = jsonify({'status': status, 'msg': msg})
         return response
+    except ValueError as e:
+        status = 1
+        msg = str(e)
+        response = jsonify({'status': status, 'msg': msg})
+        return response
 
 
-@app.route('/addReview', methods=['GET', 'POST'])
+@app.route('/getUserReview', methods=['GET', 'POST'])
+@cross_origin()
+def getUserReview():
+    data = request.get_json()
+    uid = data['uid']
+    try:
+        result = db.get_user_review(uid)
+
+        status = 0
+        msg = "Success"
+        response = jsonify({'status': status, 'msg': msg, 'content': result})
+
+        return response
+    except (KeyError, TypeError) as e:
+        status = -1
+        msg = str(e)
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+
+
+@app.route('/updateReview', methods=['GET', 'POST'])
 @cross_origin()
 def update_review():  # 添加游戏
     data = request.get_json()
