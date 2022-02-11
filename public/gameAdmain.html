@@ -71,7 +71,7 @@
             <button type="button" class="btn btn-primary my-2" data-toggle="modal" data-target="#addGameDialog">
               Add New Game
             </button>
-            <button type="button" class="btn btn-warning my-2">Sign Me Out</button>
+            <button id="signOutBtn" type="button" class="btn btn-warning my-2">Sign Me Out</button>
           </p>
         </div>
       </div>
@@ -310,20 +310,6 @@
         </div>
 
         <div class="container mt-3">
-          <div class="mb-3 mt-3">
-            <label>Version Number:</label>
-            <input type="versionNo" class="form-control" id="versionNo" placeholder="Enter Version Number"
-              name="versionNo">
-          </div>
-          <div class="mb-3">
-            <label>Release Date:</label>
-            <input type="releaseDate" class="form-control" id="releaseDate" placeholder="Enter Release Date"
-              name="releaseDate">
-          </div>
-          <div class="mb-3">
-            <label>Price (USD):</label>
-            <input type="USDPrice" class="form-control" id="price" placeholder="Enter Price in USD" name="USDPrice">
-          </div>
           <div class="mb-3">
             <label>Name:</label>
             <input type="gameName" class="form-control" id="gameName" placeholder="Enter Game Name" name="gameName">
@@ -333,9 +319,23 @@
             <input type="gameDesc" class="form-control" id="gameDesc" placeholder="Enter Game Description"
               name="gameDesc">
           </div>
+          <div class="mb-3 mt-3">
+            <label>Version Number:</label>
+            <input type="versionNo" class="form-control" id="versionNo" placeholder="Enter Version Number"
+              name="versionNo">
+          </div>
           <div class="mb-3">
-            <label>Publisher Name:</label>
-            <input type="pubName" class="form-control" id="pubName" placeholder="Enter Publisher Name" name="pubName">
+            <label>Downloads:</label>
+            <input type="pubName" class="form-control" id="downloadNum" placeholder="Enter Publisher Name" name="pubName">
+          </div>
+          <div class="mb-3">
+            <label>Price (USD):</label>
+            <input type="USDPrice" class="form-control" id="price" placeholder="Enter Price in USD" name="USDPrice">
+          </div>
+          <div class="mb-3">
+            <label>Release Date:</label>
+            <input type="releaseDate" class="form-control" id="releaseDate" placeholder="Enter Release Date"
+              name="releaseDate">
           </div>
         </div>
         

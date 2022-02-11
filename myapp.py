@@ -10,6 +10,7 @@ from flask import Flask, render_template, url_for, request, json, jsonify
 from flask_cors import cross_origin
 import db
 
+
 app = Flask(__name__)
 # 设置编码
 app.config['JSON_AS_ASCII'] = False
@@ -126,30 +127,29 @@ def add_game():  # 添加游戏
     data = request.get_json()
     try:
         name = data['name']
-        release_date = data['releaseDate']
-        price = data['price']
         description = data['description']
-        download = data['download']
         version = data['version']
-        print(name, release_date)
+        download = data['download']
+        price = data['price']
+        release_date = data['releaseDate']
         if name == '' or release_date == '' or price == '' or description == '' or download == '' or version == '':  # 非空检查
             status = 1
             msg = "Error: None of the input Can be NULL"
             response = jsonify({'status': status, 'msg': msg})
         else:
-            result = db.add_game(name, release_date, price, description, download, version)
-            if result != 1:  # 结果为0添加成功
-                status = 0
-                msg = "Add game successfully"
-                response = jsonify({'status': status, 'msg': msg, 'content': result})
-            else:
-                status = 2  # 添加游戏结果为2添加失败
-                msg = "Add game failed"
-                response = jsonify({'status': status, 'msg': msg})
+            result = db.add_game(name, description, version, download, price, release_date)
+            status = 0
+            msg = "Add game successfully"
+            response = jsonify({'status': status, 'msg': msg, 'gid': result})
         return response
     except KeyError:
         status = -1
         msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+    except ValueError as e:
+        status = -1
+        msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
 
@@ -161,7 +161,6 @@ def get_all_game():
     try:
         page_num = data['pageNum']
         max_num = data['maxNum']
-        print(page_num, max_num)
         result = db.get_all_games(page_num, max_num)
         status = 0
         msg = "Success"
@@ -191,6 +190,7 @@ def delete_game():
             response = jsonify({'status': status, 'msg': msg})
         else:
             result = db.delete_game(gid)
+            print(result)
             if result == 0:
                 status = 0
                 msg = "Success delete game"
