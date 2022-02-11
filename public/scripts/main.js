@@ -582,6 +582,21 @@ rhit.RequestAPI = class {
 			})
 			.catch(error => console.log("Request failed", error));
 	}
+
+	async getUserProfile(uid) {
+		return fetch(this._url + 'getUserProfile', {
+				method: 'POST',
+				headers: this._headers,
+				body: JSON.stringify({
+					'uid': uid
+				})
+			})
+			.then(response => {
+				console.log("status is " + response.status);
+				return response.json();
+			})
+			.catch(error => console.log("Request failed", error));
+	}
 	
 	async addReview(uid,gid,title,content,rating) {
 		return fetch(this._url + 'addReview', {
@@ -612,7 +627,7 @@ rhit.RequestAPI = class {
 					'rid': rid,
 					'title': title,
 					'content': content,
-					'rating': rating,
+					'rating': rating
 				})
 			})
 			.then(response => {
@@ -623,6 +638,27 @@ rhit.RequestAPI = class {
 		
 			.catch(error => console.log("Request failed", error));
 	}
+	async updateUserProfile(uid,address,email,phone,role) {
+		return fetch(this._url + 'updateUserProfile', {
+				method: 'POST',
+				headers: this._headers,
+				body: JSON.stringify({
+					'uid': uid,
+					'address': address,
+					'email': email,
+					'phone': phone,
+					'role': role
+				})
+			})
+			.then(response => {
+				console.log("status is " + response.status);
+				
+				return response.json();
+			})
+		
+			.catch(error => console.log("Request failed", error));
+	}
+
 	async deleteReview(rid) {
 		return fetch(this._url + 'deleteReview', {
 				method: 'POST',
@@ -1027,13 +1063,10 @@ rhit.main = function () {
 	rhit.userManager = new this.UserManager();
 	rhit.requestAPI = new this.RequestAPI(rhit.url)
 	// rhit.checkForRedirects();
-<<<<<<< HEAD
-	// rhit.initializePage();
-	rhit.requestAPI.addUserOwnGame(1,3).then(data => {
-=======
+
 	rhit.initializePage();
-	rhit.requestAPI.updateReview(3,'testUpdate1','testupdate1',4).then(data => {
->>>>>>> fe2ef79 (GamePage)
+	rhit.requestAPI.updateUserProfile(1,'test2','rose2@qq.com','1919810','admin').then(data => {
+
 		console.log(data);
 		console.log(data.status);
 		console.log(data.msg);

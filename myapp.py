@@ -328,6 +328,26 @@ def getUserReview():
         return response
 
 
+@app.route('/getUserProfile', methods=['GET', 'POST'])
+@cross_origin()
+def getUserProfile():
+    data = request.get_json()
+    uid = data['uid']
+    try:
+        result = db.get_user_profile(uid)
+
+        status = 0
+        msg = "Success"
+        response = jsonify({'status': status, 'msg': msg, 'content': result})
+
+        return response
+    except (KeyError, TypeError) as e:
+        status = -1
+        msg = str(e)
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+
+
 @app.route('/getSpecificReview', methods=['GET', 'POST'])
 @cross_origin()
 def getSpecificReview():
@@ -379,6 +399,40 @@ def update_review():  #
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
+
+
+@app.route('/updateUserProfile', methods=['GET', 'POST'])
+@cross_origin()
+def update_user_profile():  #
+    data = request.get_json()
+    try:
+        uid= data['uid']
+        address = data['address']
+        email = data['email']
+        phone = data['phone']
+        role = data['role']
+
+        if uid == '' :
+            status = 1
+            msg = "Error: UserID Cannot be NULL"
+            response = jsonify({'status': status, 'msg': msg})
+        else:
+            result = db.update_user_Profile(uid,address,email,phone,role)
+            if result == 0:  # 结果为0添加成功
+                status = 0
+                msg = "update user profile successfully"
+                response = jsonify({'status': status, 'msg': msg})
+            else:
+                status = 2  # 添加游戏结果为2添加失败
+                msg = "update review  failed"
+                response = jsonify({'status': status, 'msg': msg})
+        return response
+    except (KeyError, TypeError) as e:
+        status = -1
+        msg = str(e)
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+
 
 
 @app.route('/getUserGames', methods=['GET', 'POST'])

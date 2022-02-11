@@ -1,4 +1,4 @@
-import _scproxy
+# import _scproxy
 import pymssql
 from pymssql import _mssql
 import config
@@ -55,6 +55,18 @@ def update_user(name, password):
                 return 1
 
 
+def update_user_Profile(uid, address, email, phone, role):
+    with db_connect() as conn:
+        with conn.cursor(as_dict=True) as cursor:
+            try:
+                cursor.callproc('updateUserProfile', (uid, address, email, phone, role))
+                conn.commit()
+                return 0
+            except pymssql.DatabaseError:
+                print("Error in update_user")
+                return 1
+
+
 def add_game(name, releasedate, price, description, download, version):
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
@@ -73,6 +85,21 @@ def get_all_games(page, max_num):  # 还需要处理返回值
         with conn.cursor(as_dict=True) as cursor:
             try:
                 cursor.callproc('getAllGames', (page, max_num))
+                result = []
+                for row in cursor:
+                    result.append(row)
+                conn.commit()
+                return result
+            except pymssql.DatabaseError as e:
+                print(e)
+                raise ValueError('Failed in getting the game info!')
+
+
+def get_user_profile(uid):  # 还需要处理返回值
+    with db_connect() as conn:
+        with conn.cursor(as_dict=True) as cursor:
+            try:
+                cursor.callproc('getUserProfile', (uid,))
                 result = []
                 for row in cursor:
                     result.append(row)
