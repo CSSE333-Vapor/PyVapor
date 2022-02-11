@@ -1,8 +1,6 @@
-# import _scproxy
+import _scproxy
 import pymssql
-from pymssql import _mssql
 import config
-import datetime
 
 
 def db_connect():
@@ -56,8 +54,22 @@ def update_user(name, password):
                 return 1
 
 
-<<<<<<< HEAD
-def update_user_Profile(uid, address, email, phone, role):
+def get_user_profile(uid):  # 还需要处理返回值
+    with db_connect() as conn:
+        with conn.cursor(as_dict=True) as cursor:
+            try:
+                cursor.callproc('getUserProfile', (uid,))
+                result = []
+                for row in cursor:
+                    result.append(row)
+                conn.commit()
+                return result
+            except pymssql.DatabaseError as e:
+                print(e)
+                raise ValueError('Failed in getting the user info!')
+
+
+def update_user_profile(uid, address, email, phone, role):
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
@@ -69,10 +81,7 @@ def update_user_Profile(uid, address, email, phone, role):
                 return 1
 
 
-def add_game(name, releasedate, price, description, download, version):
-=======
 def add_game(name, description, version, download, price, release_date):
->>>>>>> 9d36ed3 (games Page Done)
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
@@ -100,21 +109,6 @@ def get_all_games(page, max_num):  # 还需要处理返回值
                 raise ValueError('Failed in getting the game info!')
 
 
-<<<<<<< HEAD
-def get_user_profile(uid):  # 还需要处理返回值
-    with db_connect() as conn:
-        with conn.cursor(as_dict=True) as cursor:
-            try:
-                cursor.callproc('getUserProfile', (uid,))
-                result = []
-                for row in cursor:
-                    result.append(row)
-                conn.commit()
-                return result
-            except pymssql.DatabaseError as e:
-                print(e)
-                raise ValueError('Failed in getting the game info!')
-=======
 def delete_game(gid):  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
@@ -126,7 +120,6 @@ def delete_game(gid):  # 还需要处理返回值
             except pymssql.DatabaseError as e:
                 print(e)
                 raise ValueError('Failed to delete the game!')
->>>>>>> 9d36ed3 (games Page Done)
 
 
 def get_all_review():  # 还需要处理返回值
