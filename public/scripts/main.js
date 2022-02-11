@@ -517,14 +517,7 @@ rhit.RequestAPI = class {
 				console.log("status is " + response.status);
 				return response.json();
 			})
-			// .then(data => {
-			// 	console.log(data);
-			// 	if (data.status == 0) {
-			// 		return data.games;
-			// 	} else {
-
-			// 	}
-			// })
+			
 			.catch(error => console.log("Request failed", error));
 	}
 
