@@ -161,6 +161,7 @@ def get_all_game():
     try:
         page_num = data['pageNum']
         max_num = data['maxNum']
+        print(page_num, max_num)
         result = db.get_all_games(page_num, max_num)
         status = 0
         msg = "Success"

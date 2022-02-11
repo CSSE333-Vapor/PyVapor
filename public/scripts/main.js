@@ -484,7 +484,6 @@ rhit.RequestAPI = class {
 			.catch(error => console.log("Request failed", error));
 	}
 
-		
 	async addUserOwnGame(uid,gid) {
 		return fetch(this._url + 'addUserOwnGame', {
 				method: 'POST',
@@ -656,46 +655,53 @@ rhit.LoginPageController = class {
 			const username = document.querySelector("#inputUsername").value;
 			const password = document.querySelector("#inputPassword").value;
 			const errorLabel = document.querySelector("#errorMessage");
+	
 			if (username == '' || password == '') {
 				errorLabel.innerHTML = 'Username or Password cannot be NULL';
 				return;
 			}
-			rhit.requestAPI.signUp(username, password).then(data => {
-				console.log(data);
-				if (data.status == 0) {
-					rhit.userManager.signIn(new rhit.User(data.uid, username));
-					console.log("Successful SignUp");
-					console.log("Redirecting");
-					window.location.href = '/index.html';
-				} else {
-					errorLabel.innerHTML = data.msg;
-				}
-			})
+
+			rhit.userManager.signUp(username, password, this.updatePage.bind(this));
+			this.disableBtn();
 		}
 
 		document.querySelector("#submitSignIn").onclick = (params) => {
 			const username = document.querySelector("#inputUsername").value;
 			const password = document.querySelector("#inputPassword").value;
 			const errorLabel = document.querySelector("#errorMessage");
-
+	
 			if (username == '' || password == '') {
 				errorLabel.innerHTML = 'Username or Password cannot be NULL';
 				return;
 			}
-			rhit.requestAPI.signIn(username, password).then(data => {
-				console.log(data);
-				console.log(data.status);
-				console.log(data.msg);
-				if (data.status == 0) {
-					rhit.userManager.signIn(new rhit.User(data.uid, username));
-					console.log("Successful SignIn");
-					console.log("Redirecting");
-					window.location.href = '/index.html';
-				} else {
-					errorLabel.innerHTML = data.msg;
-				}
-			})
 
+			rhit.userManager.signIn(username, password, this.updatePage.bind(this));
+			this.disableBtn();
+		}
+	}
+
+	disableBtn() {
+		const SignUpBtn = document.querySelector("#submitSignUp");
+		const SignInBtn = document.querySelector("#submitSignIn");
+		SignInBtn.disabled = "disabled";
+		SignUpBtn.disabled = "disabled";
+	}
+
+	enableBtn(){
+		const SignUpBtn = document.querySelector("#submitSignUp");
+		const SignInBtn = document.querySelector("#submitSignIn");
+		SignInBtn.disabled = "";
+		SignUpBtn.disabled = "";
+	}
+
+	updatePage(status, msg) {
+		const errorLabel = document.querySelector("#errorMessage");
+		this.enableBtn();
+		if(status == 0) {
+			console.log("Redirecting");
+			window.location.href = '/index.html';
+		} else {
+			errorLabel.innerHTML = msg;
 		}
 	}
 }
@@ -721,20 +727,33 @@ rhit.GamesManager = class {
 		this._gamelist = [];
 	}
 
-	updateGameList(pageNum, maxNum) {
+	updateGame(pageNum, maxNum, callback) {
 		rhit.requestAPI.getAllGames(pageNum, maxNum).then(data => {
 			console.log(data);
 			for (let row of data) {
-				console.log(row['gID']);
-				this._gamelist.push(row);
+				const game = new rhit.Game(row["gID"], row["Name"], row["Description"], row["Download"], row["Price"], row["Version"]);
+				this._gamelist.push(game);
+				console.log(game);
 				this._length++;
-				console.log(this._gamelist);
 			}
+			if(callback != null)
+			callback();
+			console.log(this._gamelist);
 		})
+		
+		
 	}
 
-	async deleteGame(gid) {
-		return rhit.requestAPI.deleteGame(gid);
+	deleteGame(gid, callback) {
+		rhit.gamesManager.deleteGame(gid).then(data => {
+			if (data.status == 0) {
+				console.log("successfully delete the game");
+				if(callback != null)
+					callback();
+			} else {
+				//
+			}
+		})
 	}
 
 	get length() {
@@ -756,10 +775,15 @@ rhit.Game = class {
 /* Controls the game pages (Names TBD)  */
 rhit.ListPageController = class {
 	constructor() {
+		this._page = 1;
+		this._pageItems = 6;
 		this.clearPage();
-		this.updateList(1, 6);
+		rhit.gamesManager = new rhit.GamesManager();
+		rhit.gamesManager.updateGame(this._page, this._pageItems, this.updatePage.bind(this))
+		window.onscroll = this.scrollToRefresh();
 	}
 
+	
 	clearPage() {
 		//Make a new quoteListContainer
 		const newList = htmlToElement('<div id="gameContainer" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3"></div>');
@@ -767,51 +791,97 @@ rhit.ListPageController = class {
 		oldList.removeAttribute("id");
 		oldList.hidden = true;
 		oldList.parentElement.appendChild(newList);
-
 	}
 
-	updateList(pageNum, maxNum) {
-		console.log("I need to update the list on the page!");
+	scrollToRefresh() {
+		//滑动
+		let scrollTop = 0;
+		if (document.documentElement && document.documentElement.scrollTop) {
+			scrollTop = document.documentElement.scrollTop;
+		} else if (document.body) {
+			scrollTop = document.body.scrollTop;
+		}
 
+		//获取当前可视范围的高度
+		let clientHeight = 0;
+		if (document.body.clientHeight && document.documentElement.clientHeight) {
+			clientHeight = Math.min(document.body.clientHeight, document.documentElement.clientHeight);
+		} else {
+			clientHeight = Math.max(document.body.clientHeight, document.documentElement.clientHeight);
+		}
+
+		//获取文档完整的高度
+		let scrollHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+
+		if (scrollTop + clientHeight == scrollHeight) {
+			console.log("Already Reach the bottom");
+			rhit.gamesManager.updateGame(this._page + 1, this._pageItems, this.updatePage);
+		}
+	}
+
+	updatePage() {
+		console.log("I need to update the list on the page!");
+		this._page++;
 		//Make a new quoteListContainer
 		const oldList = document.querySelector("#gameContainer");
 
-		rhit.requestAPI.getAllGames(pageNum, maxNum).then(data => {
-			console.log(data);
-			for (let row of data) {
-				const game = new rhit.Game(row["gID"], row["Name"], row["Description"], row["Download"], row["Price"], row["Version"]);
+		for(let i = 0; i < rhit.gamesManager.length; i++) {
+			const newCard = this._createCard(game);
+			newCard.onclick = (event) => {
+				//window.location.href = `/game.html?id=${game.gid}`;
+			}
+			oldList.appendChild(newCard);
+		}
 
-				const newCard = this._createCard(game);
-				newCard.onclick = (event) => {
-					//window.location.href = `/game.html?id=${game.gid}`;
-				}
-				oldList.appendChild(newCard);
+			
+		const delBtns = document.querySelectorAll(".card-body .btn-outline-warning")
+		console.log(delBtns);
+		for (btn of delBtns) {
+			console.log(btn);
+			btn.onclick = (event) => {
+				console.log(event);
+				rhit.gamesManager.deleteGame(event.dataset.gid);
 			}
-		}).finally(() => {
-			const delBtns = document.querySelectorAll(".card-body .btn-outline-warning")
-			console.log(delBtns);
-			for (btn of delBtns) {
-				console.log(btn);
-				btn.onclick = (event) => {
-					console.log(event);
-					rhit.gamesManager.deleteGame(event.dataset.gid).then(data => {
-						if (data.status == 0) {
-							//TODO: change this
-							this.updateList(1, 6);
-							//for now 
-						} else {
-							//
-						}
-					})
-				}
-			}
-		})
+		}
+		// rhit.requestAPI.getAllGames(pageNum, maxNum).then(data => {
+		// 	console.log(data);
+		// 	for (let row of data) {
+		// 		const game = new rhit.Game(row["gID"], row["Name"], row["Description"], row["Download"], row["Price"], row["Version"]);
+
+		// 		const newCard = this._createCard(game);
+		// 		newCard.onclick = (event) => {
+		// 			//window.location.href = `/game.html?id=${game.gid}`;
+		// 		}
+		// 		oldList.appendChild(newCard);
+		// 	}
+		// }).finally(() => {
+		// 	const delBtns = document.querySelectorAll(".card-body .btn-outline-warning")
+		// 	console.log(delBtns);
+		// 	for (btn of delBtns) {
+		// 		console.log(btn);
+		// 		btn.onclick = (event) => {
+		// 			console.log(event);
+		// 			rhit.gamesManager.deleteGame(event.dataset.gid).then(data => {
+		// 				if (data.status == 0) {
+		// 					//TODO: change this
+		// 					this.updateList(1, 6);
+		// 					//for now 
+		// 				} else {
+		// 					//
+		// 				}
+		// 			})
+		// 		}
+		// 	}
+		// })
 
 
 
 		// document.querySelector(`#btn-view-${game.gid}`).onclick = (event) => {
 
-		// }
+	 	// }
+
+
+
 	}
 
 	_createCard(game) {
@@ -849,14 +919,38 @@ rhit.UserManager = class {
 		this._user = rhit.storage.getUser();
 	}
 
-	signIn(user) {
-		this._user = user;
-		rhit.storage.setUser(user);
+	async signIn(username, password, callback) {
+		rhit.requestAPI.signIn(username, password).then(data => {
+			console.log(data);
+			if (data.status == 0) {
+				this._user = new rhit.User(data.uid, username);
+				rhit.storage.setUser(this._user);
+				callback(0, "Success");
+				//window.location.href = '/index.html';
+			} else {
+				callback(-1, data.msg);
+			}
+		})
 	}
 
-	signOut() {
+	async signUp(username, password, callback) {
+		rhit.requestAPI.signUp(username, password).then(data => {
+			console.log(data);
+			if (data.status == 0) {
+				this._user = new rhit.User(data.uid, username);
+				rhit.storage.setUser(this._user);
+				callback(0, "Success");
+				//window.location.href = '/index.html';
+			} else {
+				callback(-1, data.msg);
+			}
+		})
+	}
+
+	signOut(callback) {
 		this._user = null;
 		rhit.storage.setUser(null);
+		callback();
 	}
 
 	get isSignedIn() {
@@ -910,7 +1004,6 @@ rhit.initializePage = function () {
 
 	if (document.querySelector("#listPage")) {
 		console.log("You are on the list page");
-		rhit.gamesManager = new rhit.GamesManager();
 		new rhit.ListPageController();
 	}
 
@@ -938,11 +1031,16 @@ rhit.initializePage = function () {
 /** function and class syntax examples */
 rhit.main = function () {
 	// console.log("Ready");
-	// rhit.userManager = new this.UserManager();
+	rhit.userManager = new this.UserManager();
 	rhit.requestAPI = new this.RequestAPI(rhit.url)
 	// rhit.checkForRedirects();
+<<<<<<< HEAD
 	// rhit.initializePage();
 	rhit.requestAPI.addUserOwnGame(1,3).then(data => {
+=======
+	rhit.initializePage();
+	rhit.requestAPI.updateReview(3,'testUpdate1','testupdate1',4).then(data => {
+>>>>>>> fe2ef79 (GamePage)
 		console.log(data);
 		console.log(data.status);
 		console.log(data.msg);
