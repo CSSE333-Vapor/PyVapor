@@ -1,4 +1,4 @@
-# import _scproxy
+import _scproxy
 import pymssql
 from pymssql import _mssql
 import config
