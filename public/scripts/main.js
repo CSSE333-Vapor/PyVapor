@@ -535,13 +535,27 @@ rhit.RequestAPI = class {
 				
 				return response.json();
 			})
-			// .then(data => {
-			// 	console.log(data);
-			// 	if (data.status == 0) {
-			// 		return data.content;
-			// 	} else {
-			// 	}
-			// })
+		
+			.catch(error => console.log("Request failed", error));
+	}
+
+	async updateReview(rid,title,content,rating) {
+		return fetch(this._url + 'updateReview', {
+				method: 'POST',
+				headers: this._headers,
+				body: JSON.stringify({
+					'rid': rid,
+					'title': title,
+					'content': content,
+					'rating': rating,
+				})
+			})
+			.then(response => {
+				console.log("status is " + response.status);
+				
+				return response.json();
+			})
+		
 			.catch(error => console.log("Request failed", error));
 	}
 	async deleteReview(rid) {
@@ -855,7 +869,7 @@ rhit.main = function () {
 	rhit.requestAPI = new this.RequestAPI(rhit.url)
 	// rhit.checkForRedirects();
 	// rhit.initializePage();
-	rhit.requestAPI.addReview(1,1,'test2','test2',4).then(data => {
+	rhit.requestAPI.updateReview(3,'testUpdate1','testupdate1',4).then(data => {
 		console.log(data);
 		console.log(data.status);
 		console.log(data.msg);

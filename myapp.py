@@ -329,21 +329,21 @@ def getUserReview():
 
 @app.route('/updateReview', methods=['GET', 'POST'])
 @cross_origin()
-def update_review():  # 添加游戏
+def update_review():  #
     data = request.get_json()
     try:
-        rID = data['rID']
+        rID = data['rid']
         title = data['title']
         content = data['content']
         rating = data['rating']
         print(rID, content)
-        if rID == '':  # 非空检查
+        if rID == '':
             status = 1
             msg = "Error: review ID Cannot be NULL"
             response = jsonify({'status': status, 'msg': msg})
         else:
-            result = db.update_Review(rID, title, content, rating)
-            if result != 0:  # 结果为0添加成功
+            result = db.update_review(rID, title, content, rating)
+            if result == 0:  # 结果为0添加成功
                 status = 0
                 msg = "update review successfully"
                 response = jsonify({'status': status, 'msg': msg})
@@ -352,9 +352,9 @@ def update_review():  # 添加游戏
                 msg = "update review  failed"
                 response = jsonify({'status': status, 'msg': msg})
         return response
-    except KeyError:
+    except (KeyError, TypeError) as e:
         status = -1
-        msg = "Error: Wrong Parameter!"
+        msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
 
