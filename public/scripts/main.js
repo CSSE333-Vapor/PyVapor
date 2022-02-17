@@ -694,6 +694,75 @@ rhit.RequestAPI = class {
 			})
 			.catch(error => console.log("Request failed", error));
 	}
+
+	async getGamesByCategory(cid) {
+		return fetch(this._url + 'getGamesByCategory', {
+				method: 'POST',
+				headers: this._headers,
+				body: JSON.stringify({
+					'cid': cid
+					
+				})
+			})
+			.then(response => {
+				console.log("status is " + response.status);
+				return response.json();
+			})
+			
+			.catch(error => console.log("Request failed", error));
+	}
+	async getBillingInfoByUser(uid) {
+		return fetch(this._url + 'getBillingInfoByUser', {
+				method: 'POST',
+				headers: this._headers,
+				body: JSON.stringify({
+					'uid': uid
+					
+				})
+			})
+			.then(response => {
+				console.log("status is " + response.status);
+				return response.json();
+			})
+			
+			.catch(error => console.log("Request failed", error));
+	}
+
+	async deleteBillingInfo(bid) {
+		return fetch(this._url + 'deleteBillingInfo', {
+				method: 'POST',
+				headers: this._headers,
+				body: JSON.stringify({
+					'bid': bid
+				})
+			})
+			.then(response => {
+				console.log("status is " + response.status);
+				return response.json();
+			})
+			.catch(error => console.log("Request failed", error));
+	}
+
+	async addBillingInfo(CCNumber,NameOnCard,uID,ExpDate,SecurityCode) {
+		return fetch(this._url + 'addBillingInfo', {
+				method: 'POST',
+				headers: this._headers,
+				body: JSON.stringify({
+					'CCNumber': CCNumber,
+					'NameOnCard': NameOnCard,
+					'uID': uID,
+					'ExpDate': ExpDate,
+					'SecurityCode': SecurityCode,
+				})
+			})
+			.then(response => {
+				console.log("status is " + response.status);
+				
+				return response.json();
+			})
+		
+			.catch(error => console.log("Request failed", error));
+	}
 }
 
 
@@ -1140,7 +1209,7 @@ rhit.main = function () {
 	// rhit.checkForRedirects();
 
 	rhit.initializePage();
-	rhit.requestAPI.updateUserProfile(1,'test2','rose2@qq.com','1919810','admin').then(data => {
+	rhit.requestAPI.getBillingInfoByUser(1).then(data => {
 
 		console.log(data);
 		console.log(data.status);

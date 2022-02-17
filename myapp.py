@@ -10,7 +10,6 @@ from flask import Flask, render_template, url_for, request, json, jsonify
 from flask_cors import cross_origin
 import db
 
-
 app = Flask(__name__)
 # 设置编码
 app.config['JSON_AS_ASCII'] = False
@@ -406,18 +405,18 @@ def update_review():  #
 def update_user_profile():  #
     data = request.get_json()
     try:
-        uid= data['uid']
+        uid = data['uid']
         address = data['address']
         email = data['email']
         phone = data['phone']
         role = data['role']
 
-        if uid == '' :
+        if uid == '':
             status = 1
             msg = "Error: UserID Cannot be NULL"
             response = jsonify({'status': status, 'msg': msg})
         else:
-            result = db.update_user_Profile(uid,address,email,phone,role)
+            result = db.update_user_Profile(uid, address, email, phone, role)
             if result == 0:  # 结果为0添加成功
                 status = 0
                 msg = "update user profile successfully"
@@ -432,7 +431,6 @@ def update_user_profile():  #
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
-
 
 
 @app.route('/getUserGames', methods=['GET', 'POST'])
@@ -522,6 +520,124 @@ def deleteUserGame():
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
+
+
+@app.route('/getGamesByCategory', methods=['GET', 'POST'])
+@cross_origin()
+def getGamesByCategory():
+    data = request.get_json()
+    cid = data['cid']
+    try:
+        result = db.getGamesByCategory(cid)
+        if result != 1:
+            status = 0
+            msg = "Success to get Games by category"
+            response = jsonify({'status': status, 'msg': msg, 'content': result})
+
+        else:
+            status = 1
+            msg = "failed to get user's game"
+            response = jsonify({'status': status, 'msg': msg})
+        return response
+    except KeyError:
+        status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+
+
+@app.route('/getBillingInfoByUser', methods=['GET', 'POST'])
+@cross_origin()
+def getBillingInfoByUser():
+    data = request.get_json()
+    uid = data['uid']
+    try:
+        result = db.getBillingInfo(uid)
+        if result != 1:
+            status = 0
+            msg = "Success to get Games by category"
+            response = jsonify({'status': status, 'msg': msg, 'content': result})
+
+        else:
+            status = 1
+            msg = "failed to get user's game"
+            response = jsonify({'status': status, 'msg': msg})
+        return response
+    except KeyError:
+        status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+
+
+@app.route('/deleteBillingInfo', methods=['GET', 'POST'])
+@cross_origin()
+def deleteBillingInfo():
+    data = request.get_json()
+    try:
+        bid = data['bid']
+
+        if bid == '':  # 非空检查
+            status = 2
+            msg = "Error: input Cannot be NULL"
+            response = jsonify({'status': status, 'msg': msg})
+        else:
+            result = db.deleteBillingInfo(bid)
+            if result == 0:
+                status = 0
+                msg = "Success delete billingInfo"
+                response = jsonify({'status': status, 'msg': msg})
+            else:
+                status = 1
+                msg = "failed delete billingInfo "
+                response = jsonify({'status': status, 'msg': msg})
+        return response
+    except KeyError:
+        status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+    except ValueError as e:
+        status = 1
+        msg = str(e)
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+
+
+@app.route('/addBillingInfo', methods=['GET', 'POST'])
+@cross_origin()
+def addBillingInfo():  # 添加游戏
+    data = request.get_json()
+    try:
+
+        CCNumber = data['CCNumber']
+        NameOnCard = data['NameOnCard']
+        uID = data['uID']
+        ExpDate = data['ExpDate']
+        SecurityCode = data['SecurityCode']
+
+        if uID == '' or CCNumber == '' or NameOnCard == '' or ExpDate == '' or SecurityCode == '':  # 非空检查
+            status = 1
+            msg = "Error: None of the review input Can be NULL"
+            response = jsonify({'status': status, 'msg': msg})
+        else:
+            result = db.addBillingInfo(CCNumber, NameOnCard, uID, ExpDate, SecurityCode)
+            if result != 1:  # 结果为0添加成功
+                status = 0
+                msg = "Add BillingInfo successfully"
+                response = jsonify({'status': status, 'msg': msg, 'content': result})
+            else:
+                status = 2  # 添加游戏结果为2添加失败
+                msg = "Add BillingInfo  failed"
+                response = jsonify({'status': status, 'msg': msg})
+        return response
+    except (KeyError, TypeError) as e:
+        status = -1
+        msg = str(e)
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+
+
 
 
 @app.route('/Data', methods=['GET', 'POST'])

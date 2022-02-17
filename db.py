@@ -1,4 +1,4 @@
-import _scproxy
+# import _scproxy
 import pymssql
 import config
 
@@ -226,6 +226,62 @@ def getUsersGames(uid):  # 还需要处理返回值
             except pymssql.DatabaseError as e:
                 print(e)
                 return 1
+
+
+def getGamesByCategory(cid):  # 还需要处理返回值
+    with db_connect() as conn:
+        with conn.cursor(as_dict=True) as cursor:
+            try:
+                cursor.callproc('getGameByCategory', (cid,))
+                result = []
+                for row in cursor:
+                    result.append(row)
+                conn.commit()
+                return result
+            except pymssql.DatabaseError as e:
+                print(e)
+                return 1
+
+
+def getBillingInfo(uid):  # 还需要处理返回值
+    with db_connect() as conn:
+        with conn.cursor(as_dict=True) as cursor:
+            try:
+                cursor.callproc('getBillingInfoByUser', (uid,))
+                result = []
+                for row in cursor:
+                    result.append(row)
+                conn.commit()
+                return result
+            except pymssql.DatabaseError as e:
+                print(e)
+                return 1
+
+
+def deleteBillingInfo(bID):  # 还需要处理返回值
+    with db_connect() as conn:
+        with conn.cursor(as_dict=True) as cursor:
+            try:
+                cursor.callproc('deleteBillingInfo', (bID,))
+                conn.commit()
+                return 0
+            except pymssql.DatabaseError:
+                print("Error deleteBillingInfo")
+                return 1
+
+
+def addBillingInfo(CCNumber, NameOnCard, uID, ExpDate, SecurityCode):  # 还需要处理返回值
+    with db_connect() as conn:
+        with conn.cursor(as_dict=True) as cursor:
+            try:
+                bid = pymssql.output(int)
+                result = cursor.callproc('addBillingInfo', (CCNumber, NameOnCard, uID, ExpDate, SecurityCode, bid))
+                conn.commit()
+                return result[5]
+            except pymssql.DatabaseError:
+                print("Error in addBillingInfo")
+                return 1
+
 
 
 def getSpecificReview(uid, gid):  # 还需要处理返回值
