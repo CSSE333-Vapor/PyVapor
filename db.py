@@ -152,7 +152,7 @@ def get_user_review(uid):  # 还需要处理返回值
                 raise ValueError('Failed in getting the game info!')
 
 
-def deleteUserGame(uid, gid):  # 还需要处理返回值
+def delete_user_game(uid, gid):  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
@@ -160,7 +160,7 @@ def deleteUserGame(uid, gid):  # 还需要处理返回值
                 conn.commit()
                 return 0
             except pymssql.DatabaseError as e:
-                print("Error delete_Game")
+                print(e)
                 raise ValueError('Failed to delete the game!')
 
 

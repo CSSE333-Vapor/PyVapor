@@ -3,32 +3,61 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
-  <link rel="stylesheet" href="styles/bootstrap-material-design.min.css">
-  <link rel="stylesheet" href="styles/sidebars.css">
-  <link rel="stylesheet" href="styles/main.css">
-  <title>Vapor Game Store</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="Zeen Wang">
+  <meta name="contributors" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+  <meta name="generator" content="Hugo 0.84.0">
+  <link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/sign-in/">
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="styles/bootstrap.min.css" rel="stylesheet">
+  <!-- Custom styles for this template -->
+  <link rel="stylesheet" href="styles/login.css" rel="stylesheet">
+
+  <title>Signin</title>
 </head>
 
 <body>
-  <nav class="navbar navbar-dark fixed-top">
-    <a class="navbar-brand" href="#">Vapor Game Store</a>
-  </nav>
-  <div id="mainPage" class="container page-container">
 
-  
+  <div id="loginPage" class="container page-container">
+    
 
+    <div class="form-signin">
+      <div class="text-center">
+        <img class="mb-4" src="assets/FazbearEntertainmentLogo.png" alt="" width="72" height="72">
+        <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
+      </div>
+
+      <div class="form-group">
+        <label for="inputUsername" class="text-left">Username</label>
+        <input id="inputUsername" type="text" class="form-control" placeholder="username">
+      </div>
+      <div class="form-group">
+        <label for="inputPassword">Password</label>
+        <input id="inputPassword" type="password" class="form-control" placeholder="Password">
+      </div>
+
+      <div class="checkbox mb-3">
+        <label>
+          <input id="checkRemember" type="checkbox" value="remember-me"> Remember me
+        </label>
+      </div>
+      <div id="errorMessage"></div>
+      <div class="row">
+        <div class="col-6">
+          <button id="submitSignUp" class="w-100 btn btn-lg btn-primary">Sign Up</button>
+        </div>
+        <div class="col-6">
+          <button id="submitSignIn" class="w-100 btn btn-lg btn-primary">Sign in</button>
+        </div>
+      </div>
+      <p class="mt-5 mb-3 text-muted text-center">&copy; Vapor 2021–2022</p>
+    </div>
   </div>
   <script src="scripts/jquery.min.js"></script>
   <script src="scripts/popper.js"></script>
   <script src="scripts/bootstrap-material-design.js"></script>
   <script>$("body").bootstrapMaterialDesign();</script>
-  <script src="/__/firebase/7.18.0/firebase-app.js"></script>
-  <script src="/__/firebase/7.18.0/firebase-analytics.js"></script>
-  <script src="/__/firebase/7.18.0/firebase-auth.js"></script>
-  <script src="/__/firebase/7.18.0/firebase-firestore.js"></script>
-  <script src="/__/firebase/init.js"></script>
   <script src="scripts/bootstrap.bundle.min.js"></script>
   <script src="scripts/sidebars.js"></script>
   <script src="scripts/main.js"></script>

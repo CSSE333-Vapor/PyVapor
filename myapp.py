@@ -329,7 +329,7 @@ def getUserReview():
 
 @app.route('/getUserProfile', methods=['GET', 'POST'])
 @cross_origin()
-def getUserProfile():
+def get_user_profile():
     data = request.get_json()
     uid = data['uid']
     try:
@@ -337,7 +337,7 @@ def getUserProfile():
 
         status = 0
         msg = "Success"
-        response = jsonify({'status': status, 'msg': msg, 'content': result})
+        response = jsonify({'status': status, 'msg': msg, 'content': result[0]})
 
         return response
     except (KeyError, TypeError) as e:
@@ -416,7 +416,11 @@ def update_user_profile():  #
             msg = "Error: UserID Cannot be NULL"
             response = jsonify({'status': status, 'msg': msg})
         else:
+<<<<<<< HEAD
             result = db.update_user_Profile(uid, address, email, phone, role)
+=======
+            result = db.update_user_profile(uid, address, email, phone, role)
+>>>>>>> b110829 (all)
             if result == 0:  # 结果为0添加成功
                 status = 0
                 msg = "update user profile successfully"
@@ -435,7 +439,7 @@ def update_user_profile():  #
 
 @app.route('/getUserGames', methods=['GET', 'POST'])
 @cross_origin()
-def getUserGame():
+def get_user_game():
     data = request.get_json()
     uid = data['uid']
     try:
@@ -443,8 +447,7 @@ def getUserGame():
         if result != 1:
             status = 0
             msg = "Success"
-            response = jsonify({'status': status, 'msg': msg, 'content': result})
-
+            response = jsonify({'status': status, 'msg': msg, 'games': result})
         else:
             status = 1
             msg = "failed to get user's game"
@@ -489,7 +492,7 @@ def addUserOwnGame():  # 添加游戏
 
 @app.route('/deleteUserGame', methods=['GET', 'POST'])
 @cross_origin()
-def deleteUserGame():
+def delete_user_game():
     data = request.get_json()
     try:
         uid = data['uid']
@@ -500,7 +503,7 @@ def deleteUserGame():
             msg = "Error: input Cannot be NULL"
             response = jsonify({'status': status, 'msg': msg})
         else:
-            result = db.deleteUserGame(uid, gid)
+            result = db.delete_user_game(uid, gid)
             if result == 0:
                 status = 0
                 msg = "Success delete user game"

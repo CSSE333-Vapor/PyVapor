@@ -536,7 +536,6 @@ rhit.RequestAPI = class {
 				
 				return response.json();
 			})
-		
 			.catch(error => console.log("Request failed", error));
 	}
 
@@ -553,7 +552,15 @@ rhit.RequestAPI = class {
 				console.log("status is " + response.status);
 				return response.json();
 			})
-			
+			.then(data => {
+				console.log(data);
+				if (data.status == 0) {
+					console.log(data.games);
+					return data.games;
+				} else {
+					console.log(data);
+				}
+			})
 			.catch(error => console.log("Request failed", error));
 	}
 
@@ -818,7 +825,7 @@ rhit.LoginPageController = class {
 		this.enableBtn();
 		if(status == 0) {
 			console.log("Redirecting");
-			window.location.href = '/index.html';
+			window.location.href = '/gameList.html';
 		} else {
 			errorLabel.innerHTML = msg;
 		}
@@ -842,8 +849,8 @@ rhit.HomePageController = class {
 
 rhit.GamesManager = class {
 	constructor() {
-		this._length = 0;
 		this._gamelist = [];
+		this._usergames = [];
 	}
 
 	addGame(game, callback) {
@@ -853,7 +860,6 @@ rhit.GamesManager = class {
 				this._gamelist.push(game);
 				console.log(game);
 				console.log(this._gamelist);
-				this._length++;
 				callback();
 			} else {
 				console.log(data.msg);
@@ -865,7 +871,7 @@ rhit.GamesManager = class {
 	updateGame(pageNum, maxNum, callback) {
 		rhit.requestAPI.getAllGames(pageNum, maxNum).then(data => {
 			for (let row of data) {
-				const game = new rhit.Game(row["gID"], row["Name"], row["Description"], row["Version"], row["Download"], row["Price"], row["ReleaseDate"] );
+				const game = new rhit.Game(row["gID"], row["Name"], row["Description"], row["Version"], row["Download"], row["Price"], row["ReleaseDate"], false);
 				this._gamelist.push(game);
 				console.log(game);
 				this._length++;
@@ -876,10 +882,6 @@ rhit.GamesManager = class {
 		})
 	}
 
-	getGameAt(index) {
-		return this._gamelist[index];
-	}
-
 	deleteGame(gid, callback) {
 		rhit.requestAPI.deleteGame(gid).then(data => {
 			console.log(data);
@@ -888,7 +890,6 @@ rhit.GamesManager = class {
 				for(let i = 0; i < this.length; i++) {
 					if(this.getGameAt(i).gid == gid) {
 						this._gamelist.splice(i,1)
-						this._length--;
 						break;
 					}
 				}
@@ -900,20 +901,94 @@ rhit.GamesManager = class {
 		})
 	}
 
+	getUserGames(uid, callback) {
+		rhit.requestAPI.getUserGames(uid).then(data => {
+			console.log(data);
+			this._length = 0;
+			for(let row of data) {
+				const game = new rhit.Game(row["gID"], row["Name"], row["Description"], row["Version"], row["Download"], row["Price"], row["ReleaseDate"], true);
+				this._usergames.push(game);
+				console.log(game);
+			}
+			console.log(this._gamelist);
+			if(callback != null)
+				callback();
+		})
+	}
+
+	purchaseGame(uid, gid, callback) {
+		rhit.requestAPI.addUserOwnGame(uid, gid).then(data => {
+			console.log(data);
+			if (data.status == 0) {
+				console.log("successfully purchased the game");
+				for(let i = 0; i < this.length; i++) {
+					if(this.getGameAt(i).gid == gid) {
+						this.getGameAt(i).purchased = true;
+						break;
+					}
+				}
+				if(callback != null)
+					callback();
+			} else {
+				//
+			}
+		})
+	}
+
+
+	deleteUserGame(uid, gid, callback) {
+		rhit.requestAPI.deleteUserGame(uid, gid).then(data => {
+			console.log(data);
+			if (data.status == 0) {
+				console.log("successfully delete the game");
+				for(let i = 0; i < this.length; i++) {
+					if(this.getGameAt(i).gid == gid) {
+						this.getGameAt(i).purchased = false;
+						break;
+					}
+				}
+				for(let i = 0; i < this.userGameNumber; i++) {
+					if(this.getUserGameAt(i).gid == gid) {
+						this._usergames.splice(i,1)
+						break;
+					}
+				}
+				if(callback != null)
+					callback();
+			} else {
+				//
+			}
+		})
+	}
+
+	getGameAt(index) {
+		return this._gamelist[index];
+	}
+
+	getUserGameAt(index) {
+		return this._usergames[index];
+	}
+
+
 	get length() {
-		return this._length;
+		return this._gamelist.length;
+	}
+
+	get userGameNumber() {
+		return this._usergames.length;
 	}
 }
 
 rhit.Game = class {
-	constructor(gid, name, description, version, download, price, release_date) {
+	constructor(gid, name, description, version, download, price, release_date, purchased) {
 		this.gid = gid;
 		this.name = name;
 		this.description = description;
 		this.version = version;
 		this.download = download;
 		this.price = price;
-		this.release_date = release_date
+		this.release_date = release_date;
+		this.purchased = purchased;
 	}
 }
 
@@ -921,12 +996,42 @@ rhit.Game = class {
 rhit.ListPageController = class {
 	constructor() {
 		this._page = 1;
-		this._pageItems = 6;
+		this._pageItems = 10;
+		this._status = 0;
 		this.clearPage();
 		rhit.gamesManager = new rhit.GamesManager();
-		rhit.gamesManager.updateGame(this._page, this._pageItems, this.updatePage.bind(this))
-		window.onscroll = this.scrollToRefresh();
+		
+		const welcomeLabel = document.querySelector("#welcomeLabel");
+		const addNewGameBtn = document.querySelector("#addNewGame");
+		const showMyGamesBtn = document.querySelector("#showMyGames");
+		const showAllGamesBtn = document.querySelector("#showAllGames");
+		
+		if(rhit.userManager.isAdmin) {
+			this._status = 2;
+			welcomeLabel.innerHTML = "Welcome, System Admin";
+			addNewGameBtn.hidden = "";
+			showMyGamesBtn.hidden = "hidden";
+			showAllGamesBtn.hidden = "hidden";
+			this.updatePage();
+		}
 
+		showMyGamesBtn.onclick = (event) => {
+			this._status = 1;
+			addNewGameBtn.hidden = "hidden";
+			showMyGamesBtn.hidden = "hidden";
+			showAllGamesBtn.hidden = "";
+			rhit.gamesManager.getUserGames(rhit.userManager.uid, this.updatePage.bind(this));
+		}
+
+		showAllGamesBtn.onclick = (event) => {
+			this._status = 0;
+			addNewGameBtn.hidden = "hidden";
+			showMyGamesBtn.hidden = "";
+			showAllGamesBtn.hidden = "hidden";
+			this._page = 1;
+			rhit.gamesManager.updateGame(this._page, this._pageItems, this.updatePage.bind(this))
+		}
+		
 		document.querySelector("#submitAddGame").onclick = (event) => {
 			const name = document.querySelector("#gameName");
 			const description = document.querySelector("#gameDesc");
@@ -934,7 +1039,7 @@ rhit.ListPageController = class {
 			const price = document.querySelector("#price");
 			const download = document.querySelector("#downloadNum");
 			const release_date = document.querySelector("#releaseDate");
-			let game = new rhit.Game(-1, name.value, description.value, version.value, download.value, price.value, release_date.value)
+			let game = new rhit.Game(-1, name.value, description.value, version.value, download.value, price.value, release_date.value, false)
 			rhit.gamesManager.addGame(game, this.updatePage.bind(this));
 		}
 
@@ -943,6 +1048,9 @@ rhit.ListPageController = class {
 				window.location.href = "/login.html";
 			});
 		}
+
+		rhit.gamesManager.updateGame(this._page, this._pageItems, this.updatePage.bind(this))
+		// window.onscroll = this.scrollToRefresh();
 	}
 
 	
@@ -988,26 +1096,49 @@ rhit.ListPageController = class {
 		this.clearPage();
 		const list = document.querySelector("#gameContainer");
 
-		for(let i = 0; i < rhit.gamesManager.length; i++) {
-			console.log(i);
-			let game = rhit.gamesManager.getGameAt(i);
-			console.log(game);
-			const newCard = this._createCard(game);
-
-			list.appendChild(newCard);
+		if(this._status == 1) {
+			for(let i = 0; i < rhit.gamesManager.userGameNumber; i++) {
+				console.log(i);
+				let game = rhit.gamesManager.getUserGameAt(i);
+				console.log(game);
+				const newCard = this._createCard(game);
+				list.appendChild(newCard);
+			}
+		} else {		
+			for(let i = 0; i < rhit.gamesManager.length; i++) {
+				console.log(i);
+				let game = rhit.gamesManager.getGameAt(i);
+				console.log(game);
+				const newCard = this._createCard(game);
+				list.appendChild(newCard);
+			}
 		}
 
-			
+
+
+		
 		const delBtns = document.querySelectorAll(".card-body .btn-outline-warning");
+		const purchaseBtns = document.querySelectorAll(".card-body .btn-outline-success");
 		const viewBtns = document.querySelectorAll(".card-body .btn-outline-primary");
 		console.log(delBtns);
 		for(let btn of delBtns) {
-			//console.log(btn);
-			btn.onclick = (event) => {
-				//console.log(event.target);
-				rhit.gamesManager.deleteGame(event.target.dataset.gid, this.updatePage.bind(this));
+			if(this._status == 2) {
+				btn.onclick = (event) => {
+					rhit.gamesManager.deleteGame(event.target.dataset.gid, this.updatePage.bind(this));
+				}
+			} else {
+				btn.onclick = (event) => {
+					rhit.gamesManager.deleteUserGame(rhit.userManager.uid, event.target.dataset.gid, this.updatePage.bind(this));
+				}
 			}
 		}
+
+		for(let btn of purchaseBtns) {
+			btn.onclick = (event) => {
+				rhit.gamesManager.purchaseGame(rhit.userManager.uid, event.target.dataset.gid, this.updatePage.bind(this));
+			}
+		}
+		
 
 		for(let btn of viewBtns) {
 			//console.log(btn);
@@ -1059,29 +1190,53 @@ rhit.ListPageController = class {
 	}
 
 	_createCard(game) {
-		return htmlToElement(`
-			<div id="gameCard-${game.gid}" class="col">
-				<div class="card shadow-sm">
-					<svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg"
-						role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false">
-						<title>Placeholder</title>
-						<rect width="100%" height="100%" fill="#55595c" /><text x="50%" y="50%" fill="#eceeef"
-						dy=".3em">${game.name}</text>
-					</svg>
-
-					<div class="card-body">
-						<p class="card-text">${game.description}</p>
-						<div class="d-flex justify-content-between align-items-center">
-						<div class="btn-group">
-							<button id="btn-view-${game.gid}" type="button" class="btn btn-sm btn-outline-primary" data-gid="${game.gid}">View</button>
-							<button id="btn-delete-${game.gid}" type="button" class="btn btn-sm btn-outline-warning" data-gid="${game.gid}">Delete</button>
-						</div>
-						<small class="text-muted">Downloads: ${game.download}</small>
+		if(this._status == 2 || game.purchased) {
+			return htmlToElement(`
+				<div id="gameCard-${game.gid}" class="col">
+					<div class="card shadow-sm">
+						<svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg"
+							role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false">
+							<title>Placeholder</title>
+							<rect width="100%" height="100%" fill="#55595c" /><text x="50%" y="50%" fill="#eceeef"
+							dy=".3em">${game.name}</text>
+						</svg>
+						<div class="card-body">
+							<p class="card-text">${game.description}</p>
+							<div class="d-flex justify-content-between align-items-center">
+							<div class="btn-group">
+								<button id="btn-view-${game.gid}" type="button" class="btn btn-sm btn-outline-primary" data-gid="${game.gid}">View</button>
+								<button id="btn-delete-${game.gid}" type="button" class="btn btn-sm btn-outline-warning" data-gid="${game.gid}">Delete</button>
+							</div>
+							<small class="text-muted">Downloads: ${game.download}</small>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-		`);
+			`);
+		} else {
+			return htmlToElement(`
+				<div id="gameCard-${game.gid}" class="col">
+					<div class="card shadow-sm">
+						<svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg"
+							role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false">
+							<title>Placeholder</title>
+							<rect width="100%" height="100%" fill="#55595c" /><text x="50%" y="50%" fill="#eceeef"
+							dy=".3em">${game.name}</text>
+						</svg>
+						<div class="card-body">
+							<p class="card-text">${game.description}</p>
+							<div class="d-flex justify-content-between align-items-center">
+							<div class="btn-group">
+								<button id="btn-view-${game.gid}" type="button" class="btn btn-sm btn-outline-primary" data-gid="${game.gid}">View</button>
+								<button id="btn-purchase-${game.gid}" type="button" class="btn btn-sm btn-outline-success" data-gid="${game.gid}">Purchase</button>
+							</div>
+							<small class="text-muted">Downloads: ${game.download}</small>
+							</div>
+						</div>
+					</div>
+				</div>
+			`);
+		}
 	}
 
 
@@ -1096,11 +1251,19 @@ rhit.UserManager = class {
 	async signIn(username, password, callback) {
 		rhit.requestAPI.signIn(username, password).then(data => {
 			console.log(data);
+			this._user = new rhit.User(data.uid, username);
+			rhit.storage.setUser(this._user);
 			if (data.status == 0) {
-				this._user = new rhit.User(data.uid, username);
-				rhit.storage.setUser(this._user);
-				callback(0, "Success");
-				//window.location.href = '/index.html';
+				rhit.requestAPI.getUserProfile(data.uid).then(data => {
+					console.log(data);
+					this._user.address = data.content['Address'];
+					this._user.email = data.content['E-mail'];
+					this._user.phone = data.content['Phone'];
+					this._user.role = data.content['role'];
+					rhit.storage.setUser(this._user);
+					console.log(this._user);
+					callback(0, "Success");
+				})
 			} else {
 				callback(-1, data.msg);
 			}
@@ -1113,8 +1276,15 @@ rhit.UserManager = class {
 			if (data.status == 0) {
 				this._user = new rhit.User(data.uid, username);
 				rhit.storage.setUser(this._user);
-				callback(0, "Success");
-				//window.location.href = '/index.html';
+				rhit.requestAPI.getUserProfile(data.uid).then(data => {
+					console.log(data.content);
+					this._user.address = data.content['Address'];
+					this._user.email = data.content['E-mail'];
+					this._user.phone = data.content['Phone'];
+					this._user.role = data.content['role'];
+					rhit.storage.setUser(this._user);
+					callback(0, "Success");
+				})
 			} else {
 				callback(-1, data.msg);
 			}
@@ -1124,6 +1294,10 @@ rhit.UserManager = class {
 	async signOut() {
 		this._user = null;
 		rhit.storage.setUser(null);
+	}
+
+	get isAdmin() {
+		return this._user.role == "admin"
 	}
 
 	get isSignedIn() {
@@ -1140,6 +1314,10 @@ rhit.User = class {
 	constructor(uid, username) {
 		this.uid = uid;
 		this.username = username;
+		this.address = null;
+		this.email = null;
+		this.phone = null;
+		this.role = null;
 	}
 }
 
@@ -1162,7 +1340,7 @@ rhit.storage.setUser = function (user) {
 
 rhit.checkForRedirects = function () {
 	if (document.querySelector("#loginPage") && rhit.userManager.isSignedIn) {
-		window.location.href = "/index.html";
+		window.location.href = "/gameList.html";
 	}
 	if (!document.querySelector("#loginPage") && !rhit.userManager.isSignedIn) {
 		window.location.href = "/login.html";
@@ -1206,7 +1384,7 @@ rhit.main = function () {
 	// console.log("Ready");
 	rhit.userManager = new this.UserManager();
 	rhit.requestAPI = new this.RequestAPI(rhit.url)
-	// rhit.checkForRedirects();
+	rhit.checkForRedirects();
 
 	rhit.initializePage();
 	rhit.requestAPI.getBillingInfoByUser(1).then(data => {
