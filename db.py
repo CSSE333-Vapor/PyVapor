@@ -283,7 +283,6 @@ def addBillingInfo(CCNumber, NameOnCard, uID, ExpDate, SecurityCode):  # 还需�
                 return 1
 
 
-
 def getSpecificReview(uid, gid):  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:

@@ -3,5 +3,5 @@ import db
 from flask import Flask, render_template, url_for, request, json, jsonify
 
 
-abc = db.deleteBillingInfo(	4)
+abc = db.getUsersGames(1)
 print(abc)
