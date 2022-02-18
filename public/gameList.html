@@ -60,8 +60,11 @@
   </header>
 
   <main>
-    <div id="failedAlert" class="alert alert-danger text-center" role="alert">
-      Purchased Failed! Pleases check your Payment Information!
+    <div id="failedAlert" hidden class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+      <strong>Purchased Failed! </strong> Pleases check your Payment Information!
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
     </div>
     <section class="py-5 text-center container">
       <div class="row py-lg-5">

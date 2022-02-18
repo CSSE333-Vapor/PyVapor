@@ -585,15 +585,15 @@ rhit.RequestAPI = class {
 			.catch(error => console.log("Request failed", error));
 	}
 
-	async addUserOwnGame(uid,gid,securityCode) {
+	async addUserOwnGame(uid, gid, securityCode) {
+		console.log(securityCode);
 		return fetch(this._url + 'addUserOwnGame', {
 				method: 'POST',
 				headers: this._headers,
 				body: JSON.stringify({
 					'uid': uid,
 					'gid': gid,
-					'securityCode':securityCode
-					
+					'securityCode': securityCode
 				})
 			})
 			.then(response => {
@@ -1209,8 +1209,8 @@ rhit.GamesManager = class {
 		})
 	}
 
-	purchaseGame(uid, gid, callback) {
-		rhit.requestAPI.addUserOwnGame(uid, gid).then(data => {
+	purchaseGame(uid, gid, ccv, callback) {
+		rhit.requestAPI.addUserOwnGame(uid, gid, ccv).then(data => {
 			console.log(data);
 			if (data.status == 0) {
 				console.log("successfully purchased the game");
@@ -1223,7 +1223,7 @@ rhit.GamesManager = class {
 				if(callback != null)
 					callback();
 			} else {
-				//
+				callback(1);
 			}
 		})
 	}
@@ -1388,6 +1388,7 @@ rhit.ListPageController = class {
 		}
 
 		confirmCCV.onclick = (event) => {
+			console.log(ccvVerify.value);
 			rhit.gamesManager.purchaseGame(rhit.userManager.uid, confirmCCV.dataset.gid, ccvVerify.value, this.updatePage.bind(this));
 			ccvVerify.value = "";
 		}
@@ -1487,7 +1488,10 @@ rhit.ListPageController = class {
 	// 	}
 	// }
 
-	updatePage() {
+	updatePage(msg) {
+		if(msg == 1) {
+			document.querySelector("#failedAlert").hidden = "";
+		}
 		console.log("I need to update the list on the page!");
 		this._page++;
 		//Make a new quoteListContainer

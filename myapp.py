@@ -304,6 +304,11 @@ def add_game_to_user():  # 添加游戏
         msg = "Error: Wrong Parameter!"
         response = jsonify({'status': status, 'msg': msg})
         return response
+    except ValueError as e:
+        status = 1
+        msg = str(e)
+        response = jsonify({'status': status, 'msg': msg})
+        return response
 
 
 @app.route('/addReview', methods=['GET', 'POST'])
@@ -558,18 +563,19 @@ def get_user_game():
 
 @app.route('/addUserOwnGame', methods=['GET', 'POST'])
 @cross_origin()
-def add_user_own_game():  # 添加游戏
+def add_user_own_game(): # 添加游戏
     data = request.get_json()
     try:
         uid = data['uid']
         gid = data['gid']
-        securityCode= data['securityCode']
-        if uid == '' or gid == '':  # 非空检查
+        security_code= data['securityCode']
+        print(security_code)
+        if uid == '' or gid == '' or security_code == 'c':  # 非空检查
             status = 1
             msg = "Error: None of the review input Can be NULL"
             response = jsonify({'status': status, 'msg': msg})
         else:
-            result = db.add_user_own_games(uid, gid,securityCode)
+            result = db.add_user_own_games(uid, gid, security_code)
             if result == 0:  # 结果为0添加成功
                 status = 0
                 msg = "purchase game successfully"
