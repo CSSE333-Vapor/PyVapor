@@ -325,12 +325,13 @@ def delete_review():
     data = request.get_json()
     try:
         rid = data['rid']
+        uid= data['uid']
         if rid == '':  # 非空检查
             status = 2
             msg = "Error: uerID Cannot be NULL"
             response = jsonify({'status': status, 'msg': msg})
         else:
-            result = db.delete_review(rid)
+            result = db.delete_review(uid,rid)
             if result == 0:
                 status = 0
                 msg = "Success delete review"
