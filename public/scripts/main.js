@@ -1384,8 +1384,18 @@ rhit.ListPageController = class {
 			this.updatePage();
 		}
 
-		document.querySelector("#accountBtn").onclick = (event) => {
-			window.location.href = `/account.html?id=${rhit.userManager.uid}`;
+		document.querySelector("#submitAddBillingInfo").onclick = (event) => {
+			const CCNumberInput = document.querySelector("#CCNumber");
+			const NameOnCardInput = document.querySelector("#NameOnCard");
+			const ExpDateInput = document.querySelector("#ExpDate");
+			const SecurityCodeInput = document.querySelector("#SecurityCode");
+			rhit.requestAPI.addBillingInfo(CCNumberInput.value, NameOnCardInput.value, rhit.userManager.uid, 
+				ExpDateInput.value, SecurityCodeInput.value);
+			CCNumberInput.value = "";
+			NameOnCardInput.value = "";
+			ExpDateInput.value = "";
+			SecurityCodeInput.value = "";
+			//window.location.href = `/account.html?id=${rhit.userManager.uid}`;
 		}
 
 		confirmCCV.onclick = (event) => {
