@@ -49,9 +49,9 @@ def update_user(name, password):
                 cursor.callproc('updateUser', (name, password,))
                 conn.commit()
                 return 0
-            except pymssql.DatabaseError:
-                print("Error in update_user")
-                return 1
+            except pymssql.DatabaseError as e:
+                print(e)
+                raise ValueError('Update User Failed!')
 
 
 def get_user_profile(uid):  # 还需要处理返回值
@@ -76,9 +76,9 @@ def update_user_profile(uid, address, email, phone, role):
                 cursor.callproc('updateUserProfile', (uid, address, email, phone, role))
                 conn.commit()
                 return 0
-            except pymssql.DatabaseError:
-                print("Error in update_user")
-                return 1
+            except pymssql.DatabaseError as e:
+                print(e)
+                raise ValueError('Update User Profile Failed!')
 
 
 def add_game(name, description, version, download, price, release_date):
@@ -106,7 +106,7 @@ def get_all_games_with_category():  # 还需要处理返回值
                 return result
             except pymssql.DatabaseError as e:
                 print(e)
-                raise ValueError('Failed in getting the game info!')
+                raise ValueError('Failed in getting the game With Category!')
 
 
 def get_all_games(page, max_num):  # 还需要处理返回值
@@ -121,7 +121,7 @@ def get_all_games(page, max_num):  # 还需要处理返回值
                 return result
             except pymssql.DatabaseError as e:
                 print(e)
-                raise ValueError('Failed in getting the game info!')
+                raise ValueError('Failed in getting all game info!')
 
 
 def get_all_games_by_name(name):  # 还需要处理返回值
@@ -179,7 +179,7 @@ def get_all_category():  # 还需要处理返回值
                 return result
             except pymssql.DatabaseError as e:
                 print(e)
-                raise ValueError('Failed in getting the game info!')
+                raise ValueError('Failed in getting all category info!')
 
 
 def get_user_review(uid):  # 还需要处理返回值
@@ -194,7 +194,7 @@ def get_user_review(uid):  # 还需要处理返回值
                 return result
             except pymssql.DatabaseError as e:
                 print(e)
-                raise ValueError('Failed in getting the game info!')
+                raise ValueError('Failed in getting user review!')
 
 
 def get_specific_game_by_user(gid, uid):  # 还需要处理返回值
@@ -209,7 +209,7 @@ def get_specific_game_by_user(gid, uid):  # 还需要处理返回值
                 return result
             except pymssql.DatabaseError as e:
                 print(e)
-                raise ValueError('Failed in getting the game info!')
+                raise ValueError('Failed in getting specific game info!')
 
 
 def get_game_review(gid):  # 还需要处理返回值
@@ -224,7 +224,7 @@ def get_game_review(gid):  # 还需要处理返回值
                 return result
             except pymssql.DatabaseError as e:
                 print(e)
-                raise ValueError('Failed in getting the game info!')
+                raise ValueError('Failed in getting the game review!')
 
 
 def delete_user_game(uid, gid):  # 还需要处理返回值
@@ -236,7 +236,7 @@ def delete_user_game(uid, gid):  # 还需要处理返回值
                 return 0
             except pymssql.DatabaseError as e:
                 print(e)
-                raise ValueError('Failed to delete the game!')
+                raise ValueError('Failed to delete the user game!')
 
 
 def add_user_own_games(uid, gid, securityCode):  # 还需要处理返回值
@@ -248,7 +248,7 @@ def add_user_own_games(uid, gid, securityCode):  # 还需要处理返回值
                 return 0
             except pymssql.DatabaseError as e:
                 print(e)
-                raise ValueError("failed to get user's game")
+                raise ValueError("failed to add user's game")
 
 
 def add_review(uid, gid, title, content, rating):  # 还需要处理返回值
@@ -259,9 +259,9 @@ def add_review(uid, gid, title, content, rating):  # 还需要处理返回值
                 result = cursor.callproc('addReview', (uid, gid, title, content, rating, rid))
                 conn.commit()
                 return result[5]
-            except pymssql.DatabaseError:
-                print("Error in add_Review")
-                return 1
+            except pymssql.DatabaseError as e:
+                print(e)
+                raise ValueError('Error in adding review')
 
 
 def update_review(rid, title, content, rating):
@@ -271,9 +271,9 @@ def update_review(rid, title, content, rating):
                 cursor.callproc('updateReview', (rid, title, content, rating))
                 conn.commit()
                 return 0
-            except pymssql.DatabaseError:
-                print("Error update_Review")
-                return 1
+            except pymssql.DatabaseError as e:
+                print(e)
+                raise ValueError('Error in update Review')
 
 
 def delete_review(uid, rid):  # 还需要处理返回值
@@ -283,9 +283,9 @@ def delete_review(uid, rid):  # 还需要处理返回值
                 cursor.callproc('deleteReview', (rid, uid))
                 conn.commit()
                 return 0
-            except pymssql.DatabaseError:
-                print("Error delete_review")
-                return 1
+            except pymssql.DatabaseError as e:
+                print(e)
+                raise ValueError('Error in delete review')
 
 
 def get_users_games(uid):  # 还需要处理返回值
@@ -297,7 +297,7 @@ def get_users_games(uid):  # 还需要处理返回值
                 return result[1]
             except pymssql.DatabaseError as e:
                 print(e)
-                return -1
+                raise ValueError('Error in get user games')
 
 
 def get_games_by_category(cid):  # 还需要处理返回值
@@ -312,7 +312,7 @@ def get_games_by_category(cid):  # 还需要处理返回值
                 return result
             except pymssql.DatabaseError as e:
                 print(e)
-                return 1
+                raise ValueError('Error in getting games by category')
 
 
 def get_billing_info(uid):  # 还需要处理返回值
@@ -327,7 +327,7 @@ def get_billing_info(uid):  # 还需要处理返回值
                 return result
             except pymssql.DatabaseError as e:
                 print(e)
-                return 1
+                raise ValueError('Error in getting billing info')
 
 
 def delete_billing_info(bid):  # 还需要处理返回值
@@ -337,9 +337,9 @@ def delete_billing_info(bid):  # 还需要处理返回值
                 cursor.callproc('deleteBillingInfo', (bid,))
                 conn.commit()
                 return 0
-            except pymssql.DatabaseError:
-                print("Error deleteBillingInfo")
-                return 1
+            except pymssql.DatabaseError as e:
+                print(e)
+                raise ValueError('Error in deleting billing info!')
 
 
 def add_billing_info(cc_number, name_on_card, uid, expdate, security_code):  # 还需要处理返回值
@@ -350,9 +350,9 @@ def add_billing_info(cc_number, name_on_card, uid, expdate, security_code):  # �
                 result = cursor.callproc('addBillingInfo', (cc_number, name_on_card, uid, expdate, security_code, bid))
                 conn.commit()
                 return result[5]
-            except pymssql.DatabaseError:
-                print("Error in addBillingInfo")
-                return 1
+            except pymssql.DatabaseError as e:
+                print(e)
+                raise ValueError('Error in adding billing info!')
 
 
 def get_specific_review(uid, gid):  # 还需要处理返回值
@@ -367,4 +367,4 @@ def get_specific_review(uid, gid):  # 还需要处理返回值
                 return result
             except pymssql.DatabaseError as e:
                 print(e)
-                return 1
+                raise ValueError('Error in getting specific review!')

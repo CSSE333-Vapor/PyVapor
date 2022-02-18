@@ -76,6 +76,11 @@ def get_salt():
             response = jsonify({'status': status, 'msg': msg, 'salt': result})
         return response
     except (KeyError, TypeError) as e:
+        status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+    except ValueError as e:
         status = 2
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
@@ -142,13 +147,13 @@ def add_game():  # 添加游戏
             msg = "Add game successfully"
             response = jsonify({'status': status, 'msg': msg, 'gid': result})
         return response
-    except KeyError:
+    except (KeyError, TypeError) as e:
         status = -1
         msg = "Error: Wrong Parameter!"
         response = jsonify({'status': status, 'msg': msg})
         return response
     except ValueError as e:
-        status = -1
+        status = 2
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
@@ -264,13 +269,13 @@ def delete_game():
                 msg = "failed delete game "
                 response = jsonify({'status': status, 'msg': msg})
         return response
-    except KeyError:
+    except (KeyError, TypeError) as e:
         status = -1
         msg = "Error: Wrong Parameter!"
         response = jsonify({'status': status, 'msg': msg})
         return response
     except ValueError as e:
-        status = 1
+        status = 2
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
@@ -299,13 +304,13 @@ def add_game_to_user():  # 添加游戏
                 msg = "Add game to User failed"
                 response = jsonify({'status': status, 'msg': msg})
         return response
-    except KeyError:
+    except (KeyError, TypeError) as e:
         status = -1
         msg = "Error: Wrong Parameter!"
         response = jsonify({'status': status, 'msg': msg})
         return response
     except ValueError as e:
-        status = 1
+        status = 2
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
@@ -339,6 +344,11 @@ def add_review():  # 添加游戏
         return response
     except (KeyError, TypeError) as e:
         status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+    except ValueError as e:
+        status = 2
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
@@ -367,13 +377,13 @@ def delete_review():
                 msg = "failed delete review "
                 response = jsonify({'status': status, 'msg': msg})
         return response
-    except KeyError:
+    except (KeyError, TypeError) as e:
         status = -1
         msg = "Error: Wrong Parameter!"
         response = jsonify({'status': status, 'msg': msg})
         return response
     except ValueError as e:
-        status = 1
+        status = 2
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
@@ -392,6 +402,11 @@ def get_user_review():
         return response
     except (KeyError, TypeError) as e:
         status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+    except ValueError as e:
+        status = 2
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
@@ -410,6 +425,11 @@ def get_game_review():
         return response
     except (KeyError, TypeError) as e:
         status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+    except ValueError as e:
+        status = 2
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
@@ -429,6 +449,11 @@ def get_specific_game_by_user():
         return response
     except (KeyError, TypeError) as e:
         status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+    except ValueError as e:
+        status = 2
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
@@ -447,6 +472,11 @@ def get_user_profile():
         return response
     except (KeyError, TypeError) as e:
         status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+    except ValueError as e:
+        status = 2
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
@@ -468,6 +498,11 @@ def get_specific_review():
         return response
     except (KeyError, TypeError) as e:
         status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+    except ValueError as e:
+        status = 2
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
@@ -500,6 +535,11 @@ def update_review():  #
         return response
     except (KeyError, TypeError) as e:
         status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+    except ValueError as e:
+        status = 2
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
@@ -533,6 +573,11 @@ def update_user_profile():  #
         return response
     except (KeyError, TypeError) as e:
         status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+    except ValueError as e:
+        status = 2
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
@@ -649,9 +694,14 @@ def get_games_by_category():
             msg = "failed to get user's game"
             response = jsonify({'status': status, 'msg': msg})
         return response
-    except KeyError:
+    except (KeyError, TypeError) as e:
         status = -1
         msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+    except ValueError as e:
+        status = 2
+        msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
 
@@ -673,9 +723,14 @@ def get_billing_info_by_user():
             msg = "failed to get user's game"
             response = jsonify({'status': status, 'msg': msg})
         return response
-    except KeyError:
+    except (KeyError, TypeError) as e:
         status = -1
         msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+    except ValueError as e:
+        status = 2
+        msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
 
@@ -702,13 +757,13 @@ def delete_billing_info():
                 msg = "failed delete billingInfo "
                 response = jsonify({'status': status, 'msg': msg})
         return response
-    except KeyError:
+    except (KeyError, TypeError) as e:
         status = -1
         msg = "Error: Wrong Parameter!"
         response = jsonify({'status': status, 'msg': msg})
         return response
     except ValueError as e:
-        status = 1
+        status = 2
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
@@ -743,6 +798,11 @@ def add_billing_info():  # 添加游戏
         return response
     except (KeyError, TypeError) as e:
         status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+    except ValueError as e:
+        status = 2
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
