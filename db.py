@@ -182,6 +182,22 @@ def get_user_review(uid):  # 还需要处理返回值
                 raise ValueError('Failed in getting the game info!')
 
 
+def get_game_review(gid):  # 还需要处理返回值
+    with db_connect() as conn:
+        with conn.cursor(as_dict=True) as cursor:
+            try:
+                cursor.callproc('getReviewByGame', (gid,))
+                result = []
+                for row in cursor:
+                    result.append(row)
+                conn.commit()
+                return result
+            except pymssql.DatabaseError as e:
+                print(e)
+                raise ValueError('Failed in getting the game info!')
+
+
+
 def delete_user_game(uid, gid):  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
