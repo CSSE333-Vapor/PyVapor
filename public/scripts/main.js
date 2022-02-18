@@ -763,7 +763,7 @@ rhit.RequestAPI = class {
 			.catch(error => console.log("Request failed", error));
 	}
 
-	async getGamesByCategory(gid) {
+	async getReviewByGame(gid) {
 		return fetch(this._url + 'getGameReview', {
 				method: 'POST',
 				headers: this._headers,
