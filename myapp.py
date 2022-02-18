@@ -306,7 +306,7 @@ def add_review():  # 添加游戏
             if result != 1:  # 结果为0添加成功
                 status = 0
                 msg = "Add review successfully"
-                response = jsonify({'status': status, 'msg': msg, 'content': result})
+                response = jsonify({'status': status, 'msg': msg, 'rid': result})
             else:
                 status = 2  # 添加游戏结果为2添加失败
                 msg = "Add review  failed"
@@ -379,13 +379,14 @@ def get_game_review():
         result = db.get_game_review(gid)
         status = 0
         msg = "Success"
-        response = jsonify({'status': status, 'msg': msg, 'content': result})
+        response = jsonify({'status': status, 'msg': msg, 'reviews': result})
         return response
     except (KeyError, TypeError) as e:
         status = -1
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
+
 
 @app.route('/getGameByUser', methods=['GET', 'POST'])
 @cross_origin()
@@ -397,7 +398,7 @@ def get_specific_game_by_user():
         result = db.get_specific_game_by_user(gid,uid)
         status = 0
         msg = "Success"
-        response = jsonify({'status': status, 'msg': msg, 'content': result})
+        response = jsonify({'status': status, 'msg': msg, 'game': result[0]})
         return response
     except (KeyError, TypeError) as e:
         status = -1
@@ -517,18 +518,18 @@ def get_user_game():
     uid = data['uid']
     try:
         result = db.get_users_games(uid)
-        if result != 1:
-            status = 0
-            msg = "Success"
-            response = jsonify({'status': status, 'msg': msg, 'games': result})
-        else:
-            status = 1
-            msg = "failed to get user's game"
-            response = jsonify({'status': status, 'msg': msg})
+        status = 0
+        msg = "Success"
+        response = jsonify({'status': status, 'msg': msg, 'gids': result})
         return response
-    except KeyError:
+    except (KeyError, TypeError) as e:
         status = -1
         msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+    except ValueError as e:
+        status = 2
+        msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
 

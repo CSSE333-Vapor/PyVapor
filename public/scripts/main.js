@@ -589,7 +589,6 @@ rhit.RequestAPI = class {
 				headers: this._headers,
 				body: JSON.stringify({
 					'uid': uid
-					
 				})
 			})
 			.then(response => {
@@ -599,8 +598,9 @@ rhit.RequestAPI = class {
 			.then(data => {
 				console.log(data);
 				if (data.status == 0) {
-					console.log(data.games);
-					return data.games;
+					console.log(data.gids);
+					let list = JSON.parse('['+ data.gids + ']')
+					return list;
 				} else {
 					console.log(data);
 				}
@@ -670,7 +670,7 @@ rhit.RequestAPI = class {
 			.catch(error => console.log("Request failed", error));
 	}
 	
-	async addReview(uid,gid,title,content,rating) {
+	async addReview(uid, gid, title, content, rating) {
 		return fetch(this._url + 'addReview', {
 				method: 'POST',
 				headers: this._headers,
@@ -687,7 +687,6 @@ rhit.RequestAPI = class {
 				
 				return response.json();
 			})
-		
 			.catch(error => console.log("Request failed", error));
 	}
 
@@ -769,33 +768,46 @@ rhit.RequestAPI = class {
 				headers: this._headers,
 				body: JSON.stringify({
 					'gid': gid
-					
 				})
 			})
 			.then(response => {
 				console.log("status is " + response.status);
 				return response.json();
 			})
-			
+			.then(data => {
+				console.log(data);
+				if (data.status == 0) {
+					console.log(data.reviews);
+					return data.reviews;
+				} else {
+					console.log(data);
+				}
+			})
 			.catch(error => console.log("Request failed", error));
 	}
 
-	async getSpecificGameByUser(gid,uid) {
+	async getSpecificGameByUser(uid, gid) {
 		return fetch(this._url + 'getGameByUser', {
 				method: 'POST',
 				headers: this._headers,
 				body: JSON.stringify({
 					'gid': gid,
 					'uid': uid
-
-					
 				})
 			})
 			.then(response => {
 				console.log("status is " + response.status);
 				return response.json();
 			})
-			
+			.then(data => {
+				console.log(data);
+				if (data.status == 0) {
+					console.log(data.game);
+					return data.game;
+				} else {
+					console.log(data);
+				}
+			})
 			.catch(error => console.log("Request failed", error));
 	}
 
@@ -915,21 +927,42 @@ rhit.LoginPageController = class {
 
 /* Controls the gamePage (index.html) */
 rhit.GamePageController = class {
-	constructor(game) {
-		this.updatePage(game);
+	constructor(gid) {
+		this._game = null;
+		rhit.singleGameManager = new rhit.SingleGameManager(gid);
+		rhit.reviewManager = new rhit.ReviewManager(gid);
 
+		rhit.singleGameManager.update(gid, this.updatePage.bind(this));
+		rhit.reviewManager.update(gid, this.updateReview.bind(this));
+
+		const reviewInput = document.querySelector("#newReview");
+		reviewInput.onkeydown = (event) => {
+			if(event.key === 'Enter') {
+				console.log(reviewInput.value);
+				rhit.reviewManager.addReview(reviewInput.value, this.updateReview.bind(this));
+				reviewInput.value = "";
+			}
+		}
 		// download, price, purchased, category
 	}
 
 	updatePage(game) {
+		this._game = game;
 		document.querySelector("#title").innerHTML = game.name;
 		document.querySelector("#gameName").innerHTML = game.name;
-		document.querySelector("#gameVersion").innerHTML = game.version;
 		document.querySelector("#gameDescription").innerHTML = game.description;
+		document.querySelector("#gameVersion").innerHTML = "v " + game.version;
+	}
 
+	updateReview(msg) {
+		if(msg != 0) {
+			const reviewInput = document.querySelector("#newReview");
+			reviewInput.placeholder = msg;
+			return;
+		}
 		const newList = htmlToElement('<div id="reviewContainer"></div>');
 		const oldList = document.querySelector("#reviewContainer");
-		for(let i = 0; i < reviewManager.length; i++) {
+		for(let i = 0; i < rhit.reviewManager.length; i++) {
 			let review = rhit.reviewManager.getReviewAt(i);
 			console.log(review);
 			const newReview = this._createReview(review);
@@ -938,11 +971,18 @@ rhit.GamePageController = class {
 		oldList.removeAttribute("id");
 		oldList.hidden = true;
 		oldList.parentElement.appendChild(newList);
+
+		delBtns = document.querySelectorAll(".fa-trash");
+		for(let btn of delBtns) {
+			btn.onclick = (event) => {
+				rhit.reviewManager.deleteReview(event.target.dataset.rid, this.updateReview.bind(this));
+			}
+		}
 	}
 
 
 	_createReview(review) {
-		if(review.uid == rhit.userManager.uid) {
+		if(review.uid == rhit.userManager.uid || rhit.userManager.isAdmin) {
 			return htmlToElement(`
 				<div class="review">
 					<!-- the comment body -->
@@ -954,10 +994,10 @@ rhit.GamePageController = class {
 					<div class="review-toolbar">
 						<ul>
 							<li><i class="fa fa-calendar"></i>${review.time}</li>
-							<li><span class="user">${review.username}</span>
-								<i class="fa fa-pencil"></i>
+							<li><i class="fa fa-pencil"></i>
+								<span class="user">${review.username}</span>
 							</li>
-							<li><i class="fa fa-trash"></i></li>
+							<li><i class="fa fa-trash" data-rid="${review.rid}></i></li>
 						</ul>
 					</div>
 				</div>`
@@ -974,7 +1014,9 @@ rhit.GamePageController = class {
 					<div class="review-toolbar">
 						<ul>
 							<li><i class="fa fa-calendar"></i>${review.time}</li>
-							<li><span class="user">${review.username}</span></li>
+							<li><span class="user"><i class="fa fa-pencil"></i>
+								${review.username}</span>
+							</li>
 						</ul>
 					</div>
 				</div>`
@@ -984,7 +1026,68 @@ rhit.GamePageController = class {
 }
 
 rhit.ReviewManager = class {
+	constructor(gid) {
+		this._reviewlist = [];
+		this._gid = gid;
+	}
 
+	update(gid, callback) {
+		rhit.requestAPI.getReviewByGame(gid).then(data => {
+			console.log(data);
+			for (let row of data) {
+				const review = new rhit.Review(row['rID'], row['gID'], row['uID'], row['UserName'],row['Title'], row['Content'], row['Rating'], row['Time'], );
+				this._reviewlist.push(review);
+				console.log(review);
+			}
+			console.log(this._reviewlist);
+			if(callback != null)
+				callback(0);
+		})
+	}
+
+	addReview(content, callback) {
+		rhit.requestAPI.addReview(rhit.userManager.uid, this._gid, rhit.userManager.username, content, 5).then(data => {
+			console.log(data);
+
+			console.log(data);
+			if (data.status == 0) {
+				console.log(data.rid);
+				const review = new rhit.Review(data.rid, this._gid, rhit.userManager.uid, rhit.userManager.username, rhit.userManager.username, content, 5, null);
+				this._reviewlist.push(review);
+				if(callback != null)
+					callback(0);
+			} else {
+				callback(data.msg);
+			}
+		})
+	}
+
+	deleteReview(rid, callback) {
+		rhit.requestAPI.deleteReview(rhit.userManager.uid, rid).then(data => {
+			console.log(data);
+			if (data.status == 0) {
+				console.log(data.rid);
+				console.log("successfully delete the game");
+				for(let i = 0; i < this.length; i++) {
+					if(this.getGameAt(i).gid == gid) {
+						this._gamelist.splice(i,1)
+						break;
+					}
+				}
+				this._reviewlist.push(review);
+				if(callback != null)
+					callback(0);
+			}
+		})
+	}
+
+	getReviewAt(index) {
+		return this._reviewlist[index];
+	}
+
+	get length() {
+		return this._reviewlist.length;
+	}
 }
 
 rhit.Review = class {
@@ -1005,6 +1108,7 @@ rhit.GamesManager = class {
 	constructor() {
 		this._gamelist = [];
 		this._usergames = [];
+		this.getUserGames(rhit.userManager.uid, null);
 	}
 
 	addGame(game, callback) {
@@ -1025,10 +1129,10 @@ rhit.GamesManager = class {
 	updateByPage(pageNum, maxNum, callback) {
 		rhit.requestAPI.getAllGames(pageNum, maxNum).then(data => {
 			for (let row of data) {
-				const game = new rhit.Game(row["gID"], row["Name"], row["Description"], row["Version"], row["Download"], row["Price"], row["ReleaseDate"], false);
+				const game = new rhit.Game(row["gID"], row["Name"], row["Description"], row["Version"],
+					 row["Download"], row["Price"], row["ReleaseDate"], false);
 				this._gamelist.push(game);
 				console.log(game);
-				this._length++;
 			}
 			console.log(this._gamelist);
 			if(callback != null)
@@ -1038,12 +1142,13 @@ rhit.GamesManager = class {
 
 	update(callback) {
 		rhit.requestAPI.getAllGames().then(data => {
+			this._gamelist = [];
 			for (let row of data) {
 				let cid = '[' + row['cids'] + ']'
-				const game = new rhit.Game(row["gID"], row["Name"], row["Description"], row["Version"], row["Download"], row["Price"], row["ReleaseDate"], JSON.parse(cid), false);
+				const game = new rhit.Game(row["gID"], row["Name"], row["Description"], row["Version"], row["Download"],
+					 row["Price"], row["ReleaseDate"], JSON.parse(cid), this._usergames.includes(row["gID"]));
 				this._gamelist.push(game);
-				console.log(game);
-				this._length++;
+				//console.log(game);
 			}
 			console.log(this._gamelist);
 			if(callback != null)
@@ -1073,12 +1178,7 @@ rhit.GamesManager = class {
 	getUserGames(uid, callback) {
 		rhit.requestAPI.getUserGames(uid).then(data => {
 			console.log(data);
-			this._length = 0;
-			for(let row of data) {
-				const game = new rhit.Game(row["gID"], row["Name"], row["Description"], row["Version"], row["Download"], row["Price"], row["ReleaseDate"], true);
-				this._usergames.push(game);
-				console.log(game);
-			}
+			this._usergames = data;
 			console.log(this._gamelist);
 			if(callback != null)
 				callback();
@@ -1155,14 +1255,26 @@ rhit.SingleGameManager = class {
 
 	}
 
-	update(gid) {
-		rhit.requestAPI.getGame(rhit.userManager.uid, gid);
+	update(gid, callback) {
+		
+		rhit.requestAPI.getSpecificGameByUser(rhit.userManager.uid, gid).then(data => {
+			console.log(data);
+			const uid = data['uID'];
+			
+			let cid = '[' + data['cids'] + ']'
+			console.log(cid);
+			const game = new rhit.Game(data["gID"], data["Name"], data["Description"], data["Version"], data["Download"], data["Price"], data["ReleaseDate"], JSON.parse(cid), !!uid == rhit.userManager.uid);
+			this._game = game;
+			console.log(this._game);
+			if(callback != null)
+				callback(this._game);
+		})
 	}
 
 }
 
 rhit.Game = class {
-	constructor(gid, name, description, version, download, price, releaseDate, purchased, category) {
+	constructor(gid, name, description, version, download, price, releaseDate, category, purchased) {
 		this.gid = gid;
 		this.name = name;
 		this.description = description;
@@ -1170,8 +1282,8 @@ rhit.Game = class {
 		this.download = download;
 		this.price = price;
 		this.releaseDate = releaseDate;
-		this.purchased = purchased;
 		this.category = category
+		this.purchased = purchased;
 	}
 }
 
@@ -1183,6 +1295,8 @@ rhit.ListPageController = class {
 		this._status = 0;
 		this.clearPage();
 		
+		rhit.gamesManager = new rhit.GamesManager();
+
 		const welcomeLabel = document.querySelector("#welcomeLabel");
 		const addNewGameBtn = document.querySelector("#addNewGame");
 		const showMyGamesBtn = document.querySelector("#showMyGames");
@@ -1245,31 +1359,31 @@ rhit.ListPageController = class {
 		oldList.parentElement.appendChild(newList);
 	}
 
-	scrollToRefresh() {
-		//滑动
-		let scrollTop = 0;
-		if (document.documentElement && document.documentElement.scrollTop) {
-			scrollTop = document.documentElement.scrollTop;
-		} else if (document.body) {
-			scrollTop = document.body.scrollTop;
-		}
+	// scrollToRefresh() {
+	// 	//滑动
+	// 	let scrollTop = 0;
+	// 	if (document.documentElement && document.documentElement.scrollTop) {
+	// 		scrollTop = document.documentElement.scrollTop;
+	// 	} else if (document.body) {
+	// 		scrollTop = document.body.scrollTop;
+	// 	}
 
-		//获取当前可视范围的高度
-		let clientHeight = 0;
-		if (document.body.clientHeight && document.documentElement.clientHeight) {
-			clientHeight = Math.min(document.body.clientHeight, document.documentElement.clientHeight);
-		} else {
-			clientHeight = Math.max(document.body.clientHeight, document.documentElement.clientHeight);
-		}
+	// 	//获取当前可视范围的高度
+	// 	let clientHeight = 0;
+	// 	if (document.body.clientHeight && document.documentElement.clientHeight) {
+	// 		clientHeight = Math.min(document.body.clientHeight, document.documentElement.clientHeight);
+	// 	} else {
+	// 		clientHeight = Math.max(document.body.clientHeight, document.documentElement.clientHeight);
+	// 	}
 
-		//获取文档完整的高度
-		let scrollHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+	// 	//获取文档完整的高度
+	// 	let scrollHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
 
-		if (scrollTop + clientHeight == scrollHeight) {
-			console.log("Already Reach the bottom");
-			rhit.gamesManager.updateGame(this._page + 1, this._pageItems, this.updatePage);
-		}
-	}
+	// 	if (scrollTop + clientHeight == scrollHeight) {
+	// 		console.log("Already Reach the bottom");
+	// 		rhit.gamesManager.updateGame(this._page + 1, this._pageItems, this.updatePage);
+	// 	}
+	// }
 
 	updatePage() {
 		console.log("I need to update the list on the page!");
@@ -1278,26 +1392,17 @@ rhit.ListPageController = class {
 		this.clearPage();
 		const list = document.querySelector("#gameContainer");
 
-		if(this._status == 1) {
-			for(let i = 0; i < rhit.gamesManager.userGameNumber; i++) {
-				console.log(i);
-				let game = rhit.gamesManager.getUserGameAt(i);
-				console.log(game);
+
+		for(let i = 0; i < rhit.gamesManager.length; i++) {
+			console.log(i);
+			let game = rhit.gamesManager.getGameAt(i);
+			//console.log(game);
+			if(this._status != 1 || game.purchased) {
 				const newCard = this._createCard(game);
 				list.appendChild(newCard);
 			}
-		} else {		
-			for(let i = 0; i < rhit.gamesManager.length; i++) {
-				console.log(i);
-				let game = rhit.gamesManager.getGameAt(i);
-				console.log(game);
-				const newCard = this._createCard(game);
-				list.appendChild(newCard);
-			}
+
 		}
-
-
-
 		
 		const delBtns = document.querySelectorAll(".card-body .btn-outline-warning");
 		const purchaseBtns = document.querySelectorAll(".card-body .btn-outline-success");
@@ -1489,6 +1594,10 @@ rhit.UserManager = class {
 	get uid() {
 		return this._user.uid;
 	}
+
+	get username() {
+		return this._user.username;
+	}
 }
 
 /* User class, to store information about a user of Vapor */
@@ -1537,7 +1646,7 @@ rhit.initializePage = function () {
 
 	if (document.querySelector("#listPage")) {
 		console.log("You are on the list page");
-		rhit.gamesManager = new rhit.GamesManager();
+
 		new rhit.ListPageController();
 	}
 
@@ -1555,9 +1664,8 @@ rhit.initializePage = function () {
 			window.location.herf = "/gameList.html";
 		}
 
-		const game = rhit.gamesManager.getGameById(gid);
-		rhit.reviewManager = new rhit.reviewManager(game);
-		new rhit.GamePageController(game);
+		
+		new rhit.GamePageController(gid);
 	}
 };
 
@@ -1586,8 +1694,6 @@ rhit.main = function () {
 			//errorLabel.innerHTML = data.msg;
 		}
 	})
-
-	
 };
 
 rhit.main();

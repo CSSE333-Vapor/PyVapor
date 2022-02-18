@@ -224,16 +224,16 @@ def delete_user_game(uid, gid):  # 还需要处理返回值
                 raise ValueError('Failed to delete the game!')
 
 
-def add_user_own_games(uID, gID):  # 还需要处理返回值
+def add_user_own_games(uid, gid):  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
-                cursor.callproc('addUserOwnGame', (uID, gID))
+                cursor.callproc('addUserOwnGame', (uid, gid))
                 conn.commit()
                 return 0
-            except pymssql.DatabaseError:
-                print("Error add_UserOwnGames")
-                return 1
+            except pymssql.DatabaseError as e:
+                print(e)
+                raise ValueError("failed to get user's game")
 
 
 def add_review(uid, gid, title, content, rating):  # 还需要处理返回值
@@ -277,15 +277,12 @@ def get_users_games(uid):  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
-                cursor.callproc('getUserGames', (uid,))
-                result = []
-                for row in cursor:
-                    result.append(row)
-                conn.commit()
-                return result
+                gids = pymssql.output(str)
+                result = cursor.callproc('getUserGames', (uid, gids))
+                return result[1]
             except pymssql.DatabaseError as e:
                 print(e)
-                return 1
+                return -1
 
 
 def get_games_by_category(cid):  # 还需要处理返回值
