@@ -543,13 +543,13 @@ def add_user_own_game():  # 添加游戏
     try:
         uid = data['uid']
         gid = data['gid']
-
+        securityCode= data['securityCode']
         if uid == '' or gid == '':  # 非空检查
             status = 1
             msg = "Error: None of the review input Can be NULL"
             response = jsonify({'status': status, 'msg': msg})
         else:
-            result = db.add_user_own_games(uid, gid)
+            result = db.add_user_own_games(uid, gid,securityCode)
             if result == 0:  # 结果为0添加成功
                 status = 0
                 msg = "purchase game successfully"

@@ -224,11 +224,11 @@ def delete_user_game(uid, gid):  # 还需要处理返回值
                 raise ValueError('Failed to delete the game!')
 
 
-def add_user_own_games(uid, gid):  # 还需要处理返回值
+def add_user_own_games(uid, gid,securityCode):  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
-                cursor.callproc('addUserOwnGame', (uid, gid))
+                cursor.callproc('addUserOwnGame', (uid, gid,securityCode))
                 conn.commit()
                 return 0
             except pymssql.DatabaseError as e:
