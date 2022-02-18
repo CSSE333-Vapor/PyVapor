@@ -561,8 +561,8 @@ rhit.RequestAPI = class {
 			.then(data => {
 				console.log(data);
 				if (data.status == 0) {
-					console.log(data.games);
-					return data.games;
+					console.log(data.categories);
+					return data.categories;
 				} else {
 					console.log(data);
 				}
@@ -1305,6 +1305,7 @@ rhit.CategoryManager = class {
 	update(callback) {
 		rhit.requestAPI.getAllCategory().then(data => {
 			this._categoryList = [];
+			this._categoryList.push(new rhit.Category(0, "All"));
 			for (let row of data) {
 				const category = new rhit.Category(row["cID"], row["Name"]);
 				this._categoryList.push(category);
@@ -1313,6 +1314,14 @@ rhit.CategoryManager = class {
 			if(callback != null)
 				callback();
 		})
+	}
+
+	getCategoryNameByID(cid) {
+		for(let category of this._categoryList) {
+			if(category.cid == cid)
+				return category.name;
+		}
+		return "Category";
 	}
 
 	getCategoryAt(index) {
@@ -1352,7 +1361,7 @@ rhit.ListPageController = class {
 		this._page = 1;
 		this._pageItems = 10;
 		this._status = 0;
-		this._cid = cid;
+		this._cid = parseInt(cid);
 		this.clearPage();
 		rhit.categoryManager = new rhit.CategoryManager();
 		rhit.gamesManager = new rhit.GamesManager();
@@ -1362,6 +1371,8 @@ rhit.ListPageController = class {
 		const addNewGameBtn = document.querySelector("#addNewGame");
 		const showMyGamesBtn = document.querySelector("#showMyGames");
 		const showAllGamesBtn = document.querySelector("#showAllGames");
+		const confirmCCV = document.querySelector("#ConfirmCCV");
+		const ccvVerify = document.querySelector("#ccvVerify");
 		
 		if(rhit.userManager.isAdmin) {
 			this._status = 2;
@@ -1375,6 +1386,12 @@ rhit.ListPageController = class {
 		document.querySelector("#accountBtn").onclick = (event) => {
 			window.location.href = `/account.html?id=${rhit.userManager.uid}`;
 		}
+
+		confirmCCV.onclick = (event) => {
+			rhit.gamesManager.purchaseGame(rhit.userManager.uid, confirmCCV.dataset.gid, ccvVerify.value, this.updatePage.bind(this));
+			ccvVerify.value = "";
+		}
+
 
 		showMyGamesBtn.onclick = (event) => {
 			this._status = 1;
@@ -1415,21 +1432,6 @@ rhit.ListPageController = class {
 		// window.onscroll = this.scrollToRefresh();
 	}
 
-	updateDropdown() {
-		const newDropdown = htmlToElement(`<div id="categoryDropdown" class="dropdown-menu" aria-labelledby="dropdownMenuButton"></div>`);
-		const oldDropdown = document.querySelector("#categoryDropdown");
-
-		for(let i = 0; i < rhit.categoryManager.length; i++) {
-			console.log(i);
-			let category = rhit.categoryManager.getCategoryAt(i);
-			const newOption = htmlToElement(`<a class="dropdown-item" href="/gamelist.html?id=${category.cid}"${category.name}</a>`);
-			newDropdown.appendChild(newOption);
-		}
-		oldDropdown.removeAttribute("id");
-		oldDropdown.hidden = true;
-		oldDropdown.parentElement.appendChild(newList);
-	}
-	
 	clearPage() {
 		//Make a new quoteListContainer
 		const newList = htmlToElement('<div id="gameContainer" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3"></div>');
@@ -1437,6 +1439,26 @@ rhit.ListPageController = class {
 		oldList.removeAttribute("id");
 		oldList.hidden = true;
 		oldList.parentElement.appendChild(newList);
+	}
+
+	updateDropdown() {
+		const newDropdown = htmlToElement(`<div id="categoryDropdown" class="dropdown-menu" aria-labelledby="dropdownMenuButton"></div>`);
+		const oldDropdown = document.querySelector("#categoryDropdown");
+		const parent = oldDropdown.parentElement;
+		parent.removeChild(oldDropdown);
+
+		if(this._cid != null && this._cid != 0) {
+			const categoryLabel = document.querySelector("#selectCategory");
+			categoryLabel.innerHTML = rhit.categoryManager.getCategoryNameByID(this._cid);
+		}
+
+		for(let i = 0; i < rhit.categoryManager.length; i++) {
+			//console.log(i);
+			let category = rhit.categoryManager.getCategoryAt(i);
+			const newOption = htmlToElement(`<a class="dropdown-item" href="/gamelist.html?id=${category.cid}">${category.name}</a>`);
+			newDropdown.appendChild(newOption);
+		}
+		parent.appendChild(newDropdown);
 	}
 
 	// scrollToRefresh() {
@@ -1474,14 +1496,15 @@ rhit.ListPageController = class {
 
 
 		for(let i = 0; i < rhit.gamesManager.length; i++) {
-			console.log(i);
+			//console.log(i);
 			let game = rhit.gamesManager.getGameAt(i);
 			//console.log(game);
 			if(this._status != 1 || game.purchased) {
-				const newCard = this._createCard(game);
-				list.appendChild(newCard);
+				if(this._cid == 0 || this._cid == null || game.category.includes(this._cid)) {
+					const newCard = this._createCard(game);
+					list.appendChild(newCard);
+				}
 			}
-
 		}
 		
 		const delBtns = document.querySelectorAll(".card-body .btn-outline-warning");
@@ -1502,7 +1525,7 @@ rhit.ListPageController = class {
 
 		for(let btn of purchaseBtns) {
 			btn.onclick = (event) => {
-				rhit.gamesManager.purchaseGame(rhit.userManager.uid, event.target.dataset.gid, this.updatePage.bind(this));
+				document.querySelector("#ConfirmCCV").dataset.gid = btn.dataset.gid;
 			}
 		}
 		
@@ -1556,7 +1579,7 @@ rhit.ListPageController = class {
 							<div class="d-flex justify-content-between align-items-center">
 							<div class="btn-group">
 								<button id="btn-view-${game.gid}" type="button" class="btn btn-sm btn-outline-primary" data-gid="${game.gid}">View</button>
-								<button id="btn-purchase-${game.gid}" type="button" class="btn btn-sm btn-outline-success" data-gid="${game.gid}">Purchase</button>
+								<button id="btn-purchase-${game.gid}" type="button" class="btn btn-sm btn-outline-success" data-toggle="modal" data-target="#verifyCCVDialog" data-gid="${game.gid}">Purchase</button>
 							</div>
 							<small class="text-muted">Downloads: ${game.download}</small>
 							</div>
@@ -1680,6 +1703,9 @@ rhit.checkForRedirects = function () {
 };
 
 rhit.initializePage = function () {
+	const queryString = window.location.search;
+	const urlParams = new URLSearchParams(queryString);
+
 	if (document.querySelector("#loginPage")) {
 		console.log("You are on the login page");
 		new rhit.LoginPageController();
@@ -1688,15 +1714,16 @@ rhit.initializePage = function () {
 	if (document.querySelector("#listPage")) {
 		console.log("You are on the list page");
 
-		new rhit.ListPageController();
+		const cid = urlParams.get("id");
+		console.log(`Detail page for ${cid}`);
+
+		new rhit.ListPageController(cid);
 	}
 
 	if (document.querySelector("#gamePage")) {
 		console.log("You are on the detail page");
 		//new rhit.ListPageController();
 		//const movieQuoteId = rhit.storage.getMovieQuoteId();
-		const queryString = window.location.search;
-		const urlParams = new URLSearchParams(queryString);
 		const gid = urlParams.get("id");
 		console.log(`Detail page for ${gid}`);
 

@@ -182,7 +182,7 @@ def get_all_category():
         result = db.get_all_category()
         status = 0
         msg = "Success"
-        response = jsonify({'status': status, 'msg': msg, 'games': result})
+        response = jsonify({'status': status, 'msg': msg, 'categories': result})
         return response
     except (KeyError, TypeError):
         status = -1

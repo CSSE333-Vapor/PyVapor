@@ -19,7 +19,6 @@
 </head>
 
 <body>
-
   <header>
     <div class="collapse bg-dark" id="navbarHeader">
       <div class="container">
@@ -61,6 +60,9 @@
   </header>
 
   <main>
+    <div id="failedAlert" class="alert alert-danger text-center" role="alert">
+      Purchased Failed! Pleases check your Payment Information!
+    </div>
     <section class="py-5 text-center container">
       <div class="row py-lg-5">
         <div class="col-lg-6 col-md-8 mx-auto">
@@ -83,7 +85,7 @@
               <button class="btn btn-secondary dropdown-toggle" type="button" id="selectCategory" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 Categoty
               </button>
-              <div id="categoryDropdown" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <div id="categoryDropdown" class="dropdown-menu" hidden aria-labelledby="dropdownMenuButton">
                 <a class="dropdown-item" href="#">Action</a>
                 <a class="dropdown-item" href="#">Another action</a>
                 <a class="dropdown-item" href="#">Something else here</a>
@@ -367,6 +369,30 @@
             </button>
           </div>
           
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="modal" id="verifyCCVDialog" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Verify Your Billing Information</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <input type="text" class="form-control" id="ccvVerify" placeholder="Please enter your CCV" name="CVV">
+          </div>
+          <p>If you haven't added any Payment method, add one first!</p>
+        </div>
+        <div class="modal-footer">
+          <button id="ConfirmCCV" type="button" class="btn btn-primary" data-dismiss="modal">Confirm</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
         </div>
       </div>
     </div>
