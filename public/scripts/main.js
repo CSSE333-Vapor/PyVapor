@@ -730,11 +730,12 @@ rhit.RequestAPI = class {
 			.catch(error => console.log("Request failed", error));
 	}
 
-	async deleteReview(rid) {
+	async deleteReview(uid, rid) {
 		return fetch(this._url + 'deleteReview', {
 				method: 'POST',
 				headers: this._headers,
 				body: JSON.stringify({
+					'uid': uid,
 					'rid': rid
 				})
 			})
@@ -972,8 +973,9 @@ rhit.GamePageController = class {
 		oldList.hidden = true;
 		oldList.parentElement.appendChild(newList);
 
-		delBtns = document.querySelectorAll(".fa-trash");
-		for(let btn of delBtns) {
+		const delbtns = document.querySelectorAll(".delbtn");
+		console.log(delbtns);
+		for(let btn of delbtns) {
 			btn.onclick = (event) => {
 				rhit.reviewManager.deleteReview(event.target.dataset.rid, this.updateReview.bind(this));
 			}
@@ -982,7 +984,8 @@ rhit.GamePageController = class {
 
 
 	_createReview(review) {
-		if(review.uid == rhit.userManager.uid || rhit.userManager.isAdmin) {
+		console.log(review.uid == rhit.userManager.uid);
+		if(review.uid == rhit.userManager.uid | rhit.userManager.isAdmin) {
 			return htmlToElement(`
 				<div class="review">
 					<!-- the comment body -->
@@ -997,7 +1000,9 @@ rhit.GamePageController = class {
 							<li><i class="fa fa-pencil"></i>
 								<span class="user">${review.username}</span>
 							</li>
-							<li><i class="fa fa-trash" data-rid="${review.rid}></i></li>
+							<li>
+								<button class="btn delbtn" data-rid="${review.rid}"><i class="fa fa-trash"></i></button>
+							</li>
 						</ul>
 					</div>
 				</div>`
@@ -1066,15 +1071,13 @@ rhit.ReviewManager = class {
 		rhit.requestAPI.deleteReview(rhit.userManager.uid, rid).then(data => {
 			console.log(data);
 			if (data.status == 0) {
-				console.log(data.rid);
-				console.log("successfully delete the game");
+				console.log("successfully delete the review");
 				for(let i = 0; i < this.length; i++) {
-					if(this.getGameAt(i).gid == gid) {
-						this._gamelist.splice(i,1)
+					if(this.getReviewAt(i).rid == rid) {
+						this._reviewlist.splice(i,1)
 						break;
 					}
 				}
-				this._reviewlist.push(review);
 				if(callback != null)
 					callback(0);
 			}
