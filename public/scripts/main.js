@@ -1737,8 +1737,12 @@ rhit.initializePage = function () {
 	if (document.querySelector("#listPage")) {
 		console.log("You are on the list page");
 
-		const cid = urlParams.get("id");
+		let cid = urlParams.get("id");
 		console.log(`Detail page for ${cid}`);
+
+		if (!cid) {
+			cid = 0;
+		}
 
 		new rhit.ListPageController(cid);
 	}
