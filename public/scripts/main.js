@@ -1133,7 +1133,6 @@ rhit.GamesManager = class {
 		this._gamelist = [];
 		this._usergames = [];
 		this.getUserGames(rhit.userManager.uid, null);
-		rhit.categoryManager = new rhit.CategoryManager();
 	}
 
 	addGame(game, callback) {
@@ -1277,7 +1276,7 @@ rhit.SingleGameManager = class {
 	constructor(gid) {
 		this._game = null;
 		this.update(gid);
-		rhit.categoryManager = new rhit.CategoryManager();
+
 	}
 
 	update(gid, callback) {
@@ -1316,6 +1315,10 @@ rhit.CategoryManager = class {
 		})
 	}
 
+	getCategoryAt(index) {
+		return this._categoryList[index];
+	}
+
 	get length() {
 		return this._categoryList.length;
 	}
@@ -1351,9 +1354,9 @@ rhit.ListPageController = class {
 		this._status = 0;
 		this._cid = cid;
 		this.clearPage();
-
+		rhit.categoryManager = new rhit.CategoryManager();
 		rhit.gamesManager = new rhit.GamesManager();
-		
+
 
 		const welcomeLabel = document.querySelector("#welcomeLabel");
 		const addNewGameBtn = document.querySelector("#addNewGame");
@@ -1407,7 +1410,8 @@ rhit.ListPageController = class {
 			});
 		}
 
-		rhit.gamesManager.update(this.updatePage.bind(this))
+		rhit.gamesManager.update(this.updatePage.bind(this));
+		rhit.categoryManager.update(this.updateDropdown.bind(this));
 		// window.onscroll = this.scrollToRefresh();
 	}
 
@@ -1415,14 +1419,11 @@ rhit.ListPageController = class {
 		const newDropdown = htmlToElement(`<div id="categoryDropdown" class="dropdown-menu" aria-labelledby="dropdownMenuButton"></div>`);
 		const oldDropdown = document.querySelector("#categoryDropdown");
 
-		for(let i = 0; i < rhit.gamesManager.length; i++) {
+		for(let i = 0; i < rhit.categoryManager.length; i++) {
 			console.log(i);
-			let game = rhit.gamesManager.getGameAt(i);
-			if(this._status != 1 || game.purchased) {
-				const newCard = this._createCard(game);
-				list.appendChild(newCard);
-			}
-
+			let category = rhit.categoryManager.getCategoryAt(i);
+			const newOption = htmlToElement(`<a class="dropdown-item" href="/gamelist.html?id=${category.cid}"${category.name}</a>`);
+			newDropdown.appendChild(newOption);
 		}
 		oldDropdown.removeAttribute("id");
 		oldDropdown.hidden = true;
