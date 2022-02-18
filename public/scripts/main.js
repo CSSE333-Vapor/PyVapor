@@ -731,6 +731,7 @@ rhit.RequestAPI = class {
 	}
 
 	async deleteReview(uid, rid) {
+		console.log(uid, rid);
 		return fetch(this._url + 'deleteReview', {
 				method: 'POST',
 				headers: this._headers,
@@ -818,7 +819,6 @@ rhit.RequestAPI = class {
 				headers: this._headers,
 				body: JSON.stringify({
 					'uid': uid
-					
 				})
 			})
 			.then(response => {
@@ -977,7 +977,7 @@ rhit.GamePageController = class {
 		console.log(delbtns);
 		for(let btn of delbtns) {
 			btn.onclick = (event) => {
-				rhit.reviewManager.deleteReview(event.target.dataset.rid, this.updateReview.bind(this));
+				rhit.reviewManager.deleteReview(btn.dataset.rid, this.updateReview.bind(this));
 			}
 		}
 	}
@@ -1312,6 +1312,10 @@ rhit.ListPageController = class {
 			showMyGamesBtn.hidden = "hidden";
 			showAllGamesBtn.hidden = "hidden";
 			this.updatePage();
+		}
+
+		document.querySelector("#accountBtn").onclick = (event) => {
+			window.location.href = `/account.html?id=${rhit.userManager.uid}`;
 		}
 
 		showMyGamesBtn.onclick = (event) => {

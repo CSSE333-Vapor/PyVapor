@@ -325,7 +325,8 @@ def delete_review():
     data = request.get_json()
     try:
         rid = data['rid']
-        uid= data['uid']
+        uid = data['uid']
+        print(rid, uid)
         if rid == '':  # 非空检查
             status = 2
             msg = "Error: uerID Cannot be NULL"
