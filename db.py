@@ -1,4 +1,4 @@
-# import _scproxy
+import _scproxy
 import pymssql
 import config
 
@@ -98,7 +98,7 @@ def get_all_games_with_category():  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
-                cursor.callproc('getAllGamesWithCategory', (,))
+                cursor.callproc('getAllGameWithCategory', ())
                 result = []
                 for row in cursor:
                     result.append(row)

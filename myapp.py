@@ -175,9 +175,9 @@ def get_all_game():
         return response
 
 
-@app.route('/getAllGamesPage', methods=['GET', 'POST'])
+@app.route('/getAllGamesOld', methods=['GET', 'POST'])
 @cross_origin()
-def get_all_game():
+def get_all_game_old():
     data = request.get_json()
     try:
         page_num = data['pageNum']

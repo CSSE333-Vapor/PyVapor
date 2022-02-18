@@ -471,7 +471,7 @@ rhit.RequestAPI = class {
 					'version': game.version,
 					'download': game.download,
 					'price': game.price,
-					'releaseDate': game.release_date
+					'releaseDate': game.releaseDate
 				})
 			})
 			.then(response => {
@@ -481,7 +481,7 @@ rhit.RequestAPI = class {
 			.catch(error => console.log("Request failed", error));
 	}
 
-	async getAllGames(pageNum, maxNum) {
+	async getAllGamesPage(pageNum, maxNum) {
 		return fetch(this._url + 'getAllGames', {
 				method: 'POST',
 				headers: this._headers,
@@ -489,6 +489,27 @@ rhit.RequestAPI = class {
 					'pageNum': pageNum,
 					'maxNum': maxNum
 				})
+			})
+			.then(response => {
+				console.log("status is " + response.status);
+				return response.json();
+			})
+			.then(data => {
+				console.log(data);
+				if (data.status == 0) {
+					console.log(data.games);
+					return data.games;
+				} else {
+					console.log(data);
+				}
+			})
+			.catch(error => console.log("Request failed", error));
+	}
+
+	async getAllGames() {
+		return fetch(this._url + 'getAllGames', {
+				method: 'POST',
+				headers: this._headers
 			})
 			.then(response => {
 				console.log("status is " + response.status);
@@ -868,10 +889,25 @@ rhit.GamesManager = class {
 		})
 	}
 
-	updateGame(pageNum, maxNum, callback) {
+	updateByPage(pageNum, maxNum, callback) {
 		rhit.requestAPI.getAllGames(pageNum, maxNum).then(data => {
 			for (let row of data) {
 				const game = new rhit.Game(row["gID"], row["Name"], row["Description"], row["Version"], row["Download"], row["Price"], row["ReleaseDate"], false);
+				this._gamelist.push(game);
+				console.log(game);
+				this._length++;
+			}
+			console.log(this._gamelist);
+			if(callback != null)
+				callback();
+		})
+	}
+
+	update(callback) {
+		rhit.requestAPI.getAllGames().then(data => {
+			for (let row of data) {
+				let cid = '[' + row['cids'] + ']'
+				const game = new rhit.Game(row["gID"], row["Name"], row["Description"], row["Version"], row["Download"], row["Price"], row["ReleaseDate"], JSON.parse(cid), false);
 				this._gamelist.push(game);
 				console.log(game);
 				this._length++;
@@ -980,15 +1016,16 @@ rhit.GamesManager = class {
 }
 
 rhit.Game = class {
-	constructor(gid, name, description, version, download, price, release_date, purchased) {
+	constructor(gid, name, description, version, download, price, releaseDate, purchased, category) {
 		this.gid = gid;
 		this.name = name;
 		this.description = description;
 		this.version = version;
 		this.download = download;
 		this.price = price;
-		this.release_date = release_date;
+		this.releaseDate = releaseDate;
 		this.purchased = purchased;
+		this.category = category
 	}
 }
 
@@ -1029,7 +1066,7 @@ rhit.ListPageController = class {
 			showMyGamesBtn.hidden = "";
 			showAllGamesBtn.hidden = "hidden";
 			this._page = 1;
-			rhit.gamesManager.updateGame(this._page, this._pageItems, this.updatePage.bind(this))
+			rhit.gamesManager.update(this.updatePage.bind(this))
 		}
 		
 		document.querySelector("#submitAddGame").onclick = (event) => {
@@ -1038,8 +1075,8 @@ rhit.ListPageController = class {
 			const version = document.querySelector("#versionNo");
 			const price = document.querySelector("#price");
 			const download = document.querySelector("#downloadNum");
-			const release_date = document.querySelector("#releaseDate");
-			let game = new rhit.Game(-1, name.value, description.value, version.value, download.value, price.value, release_date.value, false)
+			const releaseDate = document.querySelector("#releaseDate");
+			let game = new rhit.Game(-1, name.value, description.value, version.value, download.value, price.value, releaseDate.value, false)
 			rhit.gamesManager.addGame(game, this.updatePage.bind(this));
 		}
 
@@ -1049,7 +1086,7 @@ rhit.ListPageController = class {
 			});
 		}
 
-		rhit.gamesManager.updateGame(this._page, this._pageItems, this.updatePage.bind(this))
+		rhit.gamesManager.update(this.updatePage.bind(this))
 		// window.onscroll = this.scrollToRefresh();
 	}
 
