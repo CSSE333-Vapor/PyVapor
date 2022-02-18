@@ -1112,6 +1112,7 @@ rhit.GamesManager = class {
 		this._gamelist = [];
 		this._usergames = [];
 		this.getUserGames(rhit.userManager.uid, null);
+		rhit.categoryManager = new rhit.CategoryManager();
 	}
 
 	addGame(game, callback) {
@@ -1255,7 +1256,7 @@ rhit.SingleGameManager = class {
 	constructor(gid) {
 		this._game = null;
 		this.update(gid);
-
+		rhit.categoryManager = new rhit.CategoryManager();
 	}
 
 	update(gid, callback) {
@@ -1274,6 +1275,37 @@ rhit.SingleGameManager = class {
 		})
 	}
 
+}
+
+rhit.CategoryManager = class {
+	constructor() {
+		this._categoryList = [];
+	}
+
+	update(callback) {
+		rhit.requestAPI.getAllCategory().then(data => {
+			this._categoryList = [];
+			for (let row of data) {
+				const category = new rhit.Category(row["cID"], row["Name"]);
+				this._categoryList.push(category);
+			}
+			console.log(this._categoryList);
+			if(callback != null)
+				callback();
+		})
+	}
+
+	get length() {
+		return this._categoryList.length;
+	}
+
+}
+
+rhit.Category = class {
+	constructor(cid, name) {
+		this.cid = cid;
+		this.name = name;
+	}
 }
 
 rhit.Game = class {
@@ -1298,8 +1330,9 @@ rhit.ListPageController = class {
 		this._status = 0;
 		this._cid = cid;
 		this.clearPage();
-		
+
 		rhit.gamesManager = new rhit.GamesManager();
+		
 
 		const welcomeLabel = document.querySelector("#welcomeLabel");
 		const addNewGameBtn = document.querySelector("#addNewGame");
@@ -1357,6 +1390,23 @@ rhit.ListPageController = class {
 		// window.onscroll = this.scrollToRefresh();
 	}
 
+	updateDropdown() {
+		const newDropdown = htmlToElement(`<div id="categoryDropdown" class="dropdown-menu" aria-labelledby="dropdownMenuButton"></div>`);
+		const oldDropdown = document.querySelector("#categoryDropdown");
+
+		for(let i = 0; i < rhit.gamesManager.length; i++) {
+			console.log(i);
+			let game = rhit.gamesManager.getGameAt(i);
+			if(this._status != 1 || game.purchased) {
+				const newCard = this._createCard(game);
+				list.appendChild(newCard);
+			}
+
+		}
+		oldDropdown.removeAttribute("id");
+		oldDropdown.hidden = true;
+		oldDropdown.parentElement.appendChild(newList);
+	}
 	
 	clearPage() {
 		//Make a new quoteListContainer
