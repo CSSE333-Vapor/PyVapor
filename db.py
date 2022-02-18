@@ -1,4 +1,4 @@
-import _scproxy
+# import _scproxy
 import pymssql
 import config
 
@@ -167,6 +167,21 @@ def get_all_review():  # 还需要处理返回值
                 raise ValueError('Failed in getting the game info!')
 
 
+def get_all_category():  # 还需要处理返回值
+    with db_connect() as conn:
+        with conn.cursor(as_dict=True) as cursor:
+            try:
+                cursor.callproc('getAllCategory', ())
+                result = []
+                for row in cursor:
+                    result.append(row)
+                conn.commit()
+                return result
+            except pymssql.DatabaseError as e:
+                print(e)
+                raise ValueError('Failed in getting the game info!')
+
+
 def get_user_review(uid):  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
@@ -224,11 +239,11 @@ def delete_user_game(uid, gid):  # 还需要处理返回值
                 raise ValueError('Failed to delete the game!')
 
 
-def add_user_own_games(uid, gid,securityCode):  # 还需要处理返回值
+def add_user_own_games(uid, gid, securityCode):  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
-                cursor.callproc('addUserOwnGame', (uid, gid,securityCode))
+                cursor.callproc('addUserOwnGame', (uid, gid, securityCode))
                 conn.commit()
                 return 0
             except pymssql.DatabaseError as e:
