@@ -15,7 +15,7 @@ rhit.url = "http://127.0.0.1:8080/"
 rhit.userManager = null;
 rhit.requestAPI = null;
 rhit.gamesManager = null;
-
+rhit.reviewManager = null;
 
 // md5 encrypt from https://www.cnblogs.com/lqqmigo/p/13583105.html
 rhit.md5 = function MD5(instring) {
@@ -893,20 +893,93 @@ rhit.LoginPageController = class {
 	}
 }
 
-/* Controls the homepage (index.html) */
-rhit.HomePageController = class {
-	constructor() {
+/* Controls the gamePage (index.html) */
+rhit.GamePageController = class {
+	constructor(game) {
+		this.updatePage(game);
 
+		// download, price, purchased, category
 	}
 
-	methodName() {
+	updatePage(game) {
+		document.querySelector("#title").innerHTML = game.name;
+		document.querySelector("#gameName").innerHTML = game.name;
+		document.querySelector("#gameVersion").innerHTML = game.version;
+		document.querySelector("#gameDescription").innerHTML = game.description;
 
+		const newList = htmlToElement('<div id="reviewContainer"></div>');
+		const oldList = document.querySelector("#reviewContainer");
+		for(let i = 0; i < reviewManager.length; i++) {
+			let review = rhit.reviewManager.getReviewAt(i);
+			console.log(review);
+			const newReview = this._createReview(review);
+			newList.appendChild(newReview);
+		}
+		oldList.removeAttribute("id");
+		oldList.hidden = true;
+		oldList.parentElement.appendChild(newList);
 	}
 
-	get isSignedIn() {
 
+	_createReview(review) {
+		if(review.uid == rhit.userManager.uid) {
+			return htmlToElement(`
+				<div class="review">
+					<!-- the comment body -->
+					<div class="review-body">
+						<h5>${review.title}</h5>
+						<p>${review.content}</p>
+					</div>
+					<!-- comments toolbar -->
+					<div class="review-toolbar">
+						<ul>
+							<li><i class="fa fa-calendar"></i>${review.time}</li>
+							<li><span class="user">${review.username}</span>
+								<i class="fa fa-pencil"></i>
+							</li>
+							<li><i class="fa fa-trash"></i></li>
+						</ul>
+					</div>
+				</div>`
+			);
+		} else {
+			return htmlToElement(`
+				<div class="review">
+					<!-- the comment body -->
+					<div class="review-body">
+						<h5>${review.title}</h5>
+						<p>${review.content}</p>
+					</div>
+					<!-- comments toolbar -->
+					<div class="review-toolbar">
+						<ul>
+							<li><i class="fa fa-calendar"></i>${review.time}</li>
+							<li><span class="user">${review.username}</span></li>
+						</ul>
+					</div>
+				</div>`
+			);
+		}
 	}
 }
+
+rhit.ReviewManager = class {
+
+}
+
+rhit.Review = class {
+	constructor(rid, gid, uid, username, title, content, rating, time) {
+		this.rid = rid;
+		this.gid = gid;
+		this.uid = uid;
+		this.username = username;
+		this.title = title;
+		this.content = content;
+		this.rating = rating;
+		this.time = time;
+	}
+}
+
 
 rhit.GamesManager = class {
 	constructor() {
@@ -1055,6 +1128,19 @@ rhit.GamesManager = class {
 	}
 }
 
+rhit.SingleGameManager = class {
+	constructor(gid) {
+		this._game = null;
+		this.update(gid);
+
+	}
+
+	update(gid) {
+		rhit.requestAPI.getGame(rhit.userManager.uid, gid);
+	}
+
+}
+
 rhit.Game = class {
 	constructor(gid, name, description, version, download, price, releaseDate, purchased, category) {
 		this.gid = gid;
@@ -1076,7 +1162,6 @@ rhit.ListPageController = class {
 		this._pageItems = 10;
 		this._status = 0;
 		this.clearPage();
-		rhit.gamesManager = new rhit.GamesManager();
 		
 		const welcomeLabel = document.querySelector("#welcomeLabel");
 		const addNewGameBtn = document.querySelector("#addNewGame");
@@ -1432,26 +1517,28 @@ rhit.initializePage = function () {
 
 	if (document.querySelector("#listPage")) {
 		console.log("You are on the list page");
+		rhit.gamesManager = new rhit.GamesManager();
 		new rhit.ListPageController();
 	}
 
-	// if (document.querySelector("#gamePage")) {
-	// 	console.log("You are on the detail page");
-	// 	//new rhit.ListPageController();
-	// 	//const movieQuoteId = rhit.storage.getMovieQuoteId();
-	// 	const queryString = window.location.search;
-	// 	const urlParams = new URLSearchParams(queryString);
-	// 	const movieQuoteId = urlParams.get("id");
-	// 	console.log(`Detail page for ${movieQuoteId}`);
+	if (document.querySelector("#gamePage")) {
+		console.log("You are on the detail page");
+		//new rhit.ListPageController();
+		//const movieQuoteId = rhit.storage.getMovieQuoteId();
+		const queryString = window.location.search;
+		const urlParams = new URLSearchParams(queryString);
+		const gid = urlParams.get("id");
+		console.log(`Detail page for ${gid}`);
 
-	// 	if (!movieQuoteId) {
-	// 		console.log("Error! Missing movie quote id!");
-	// 		window.location.herf = "/";
-	// 	}
+		if (!gid) {
+			console.log("Error! Missing movie quote id!");
+			window.location.herf = "/gameList.html";
+		}
 
-	// 	rhit.fbSingleQuoteManager = new rhit.FBSingleQuoteManager(movieQuoteId);
-	// 	new rhit.DetailPageController(movieQuoteId);
-	// }
+		const game = rhit.gamesManager.getGameById(gid);
+		rhit.reviewManager = new rhit.reviewManager(game);
+		new rhit.GamePageController(game);
+	}
 };
 
 
