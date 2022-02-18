@@ -387,6 +387,24 @@ def get_game_review():
         response = jsonify({'status': status, 'msg': msg})
         return response
 
+@app.route('/getGameByUser', methods=['GET', 'POST'])
+@cross_origin()
+def get_specific_game_by_user():
+    data = request.get_json()
+    gid = data['gid']
+    uid = data['uid']
+    try:
+        result = db.get_specific_game_by_user(gid,uid)
+        status = 0
+        msg = "Success"
+        response = jsonify({'status': status, 'msg': msg, 'content': result})
+        return response
+    except (KeyError, TypeError) as e:
+        status = -1
+        msg = str(e)
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+
 
 @app.route('/getUserProfile', methods=['GET', 'POST'])
 @cross_origin()

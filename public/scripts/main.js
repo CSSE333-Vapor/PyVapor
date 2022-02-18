@@ -779,6 +779,26 @@ rhit.RequestAPI = class {
 			
 			.catch(error => console.log("Request failed", error));
 	}
+
+	async getSpecificGameByUser(gid,uid) {
+		return fetch(this._url + 'getGameByUser', {
+				method: 'POST',
+				headers: this._headers,
+				body: JSON.stringify({
+					'gid': gid,
+					'uid': uid
+
+					
+				})
+			})
+			.then(response => {
+				console.log("status is " + response.status);
+				return response.json();
+			})
+			
+			.catch(error => console.log("Request failed", error));
+	}
+
 	async getBillingInfoByUser(uid) {
 		return fetch(this._url + 'getBillingInfoByUser', {
 				method: 'POST',
