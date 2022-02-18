@@ -570,7 +570,7 @@ def add_user_own_game(): # 添加游戏
         gid = data['gid']
         security_code= data['securityCode']
         print(security_code)
-        if uid == '' or gid == '' or security_code == 'c':  # 非空检查
+        if uid == '' or gid == '' or security_code == '':  # 非空检查
             status = 1
             msg = "Error: None of the review input Can be NULL"
             response = jsonify({'status': status, 'msg': msg})
