@@ -1292,10 +1292,11 @@ rhit.Game = class {
 
 /* Controls the game pages (Names TBD)  */
 rhit.ListPageController = class {
-	constructor() {
+	constructor(cid) {
 		this._page = 1;
 		this._pageItems = 10;
 		this._status = 0;
+		this._cid = cid;
 		this.clearPage();
 		
 		rhit.gamesManager = new rhit.GamesManager();
@@ -1441,45 +1442,6 @@ rhit.ListPageController = class {
 				window.location.href = `/game.html?id=${event.target.dataset.gid}`;
 			}
 		}
-
-		// rhit.requestAPI.getAllGames(pageNum, maxNum).then(data => {
-		// 	console.log(data);
-		// 	for (let row of data) {
-		// 		const game = new rhit.Game(row["gID"], row["Name"], row["Description"], row["Download"], row["Price"], row["Version"]);
-
-		// 		const newCard = this._createCard(game);
-		// 		newCard.onclick = (event) => {
-		// 			//window.location.href = `/game.html?id=${game.gid}`;
-		// 		}
-		// 		oldList.appendChild(newCard);
-		// 	}
-		// }).finally(() => {
-		// 	const delBtns = document.querySelectorAll(".card-body .btn-outline-warning")
-		// 	console.log(delBtns);
-		// 	for (btn of delBtns) {
-		// 		console.log(btn);
-		// 		btn.onclick = (event) => {
-		// 			console.log(event);
-		// 			rhit.gamesManager.deleteGame(event.dataset.gid).then(data => {
-		// 				if (data.status == 0) {
-		// 					//TODO: change this
-		// 					this.updateList(1, 6);
-		// 					//for now 
-		// 				} else {
-		// 					//
-		// 				}
-		// 			})
-		// 		}
-		// 	}
-		// })
-
-
-
-		// document.querySelector(`#btn-view-${game.gid}`).onclick = (event) => {
-
-	 	// }
-
-
 
 	}
 
