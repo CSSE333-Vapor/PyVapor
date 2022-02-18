@@ -174,6 +174,28 @@ def get_all_game():
         response = jsonify({'status': status, 'msg': msg})
         return response
 
+@app.route('/getAllGamesByName', methods=['GET', 'POST'])
+@cross_origin()
+def get_all_game_by_name():
+    data = request.get_json()
+    try:
+        name = data['name']
+        result = db.get_all_games_by_name(name)
+        status = 0
+        msg = "Success"
+        response = jsonify({'status': status, 'msg': msg, 'games': result})
+        return response
+    except (KeyError, TypeError):
+        status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+    except ValueError as e:
+        status = 1
+        msg = str(e)
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+
 
 @app.route('/getAllGamesOld', methods=['GET', 'POST'])
 @cross_origin()

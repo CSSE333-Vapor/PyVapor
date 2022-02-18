@@ -1,4 +1,4 @@
-import _scproxy
+# import _scproxy
 import pymssql
 import config
 
@@ -114,6 +114,21 @@ def get_all_games(page, max_num):  # 还需要处理返回值
         with conn.cursor(as_dict=True) as cursor:
             try:
                 cursor.callproc('getAllGames', (page, max_num))
+                result = []
+                for row in cursor:
+                    result.append(row)
+                conn.commit()
+                return result
+            except pymssql.DatabaseError as e:
+                print(e)
+                raise ValueError('Failed in getting the game info!')
+
+
+def get_all_games_by_name(name):  # 还需要处理返回值
+    with db_connect() as conn:
+        with conn.cursor(as_dict=True) as cursor:
+            try:
+                cursor.callproc('getAllGamesByName', (name,))
                 result = []
                 for row in cursor:
                     result.append(row)

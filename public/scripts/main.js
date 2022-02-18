@@ -423,6 +423,8 @@ rhit.RequestAPI = class {
 			.catch(error => console.log("Request failed", error));
 	}
 
+
+
 	async signUp(username, password) {
 		return fetch(rhit.url + 'signUp', {
 				method: 'POST',
@@ -508,6 +510,27 @@ rhit.RequestAPI = class {
 
 	async getAllGames() {
 		return fetch(this._url + 'getAllGames', {
+				method: 'POST',
+				headers: this._headers
+			})
+			.then(response => {
+				console.log("status is " + response.status);
+				return response.json();
+			})
+			.then(data => {
+				console.log(data);
+				if (data.status == 0) {
+					console.log(data.games);
+					return data.games;
+				} else {
+					console.log(data);
+				}
+			})
+			.catch(error => console.log("Request failed", error));
+	}
+
+	async getAllGamesByName() {
+		return fetch(this._url + 'getAllGamesByName', {
 				method: 'POST',
 				headers: this._headers
 			})
