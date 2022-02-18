@@ -94,6 +94,21 @@ def add_game(name, description, version, download, price, release_date):
                 raise ValueError('Failed in adding the game!')
 
 
+def get_all_games_with_category():  # 还需要处理返回值
+    with db_connect() as conn:
+        with conn.cursor(as_dict=True) as cursor:
+            try:
+                cursor.callproc('getAllGamesWithCategory', (,))
+                result = []
+                for row in cursor:
+                    result.append(row)
+                conn.commit()
+                return result
+            except pymssql.DatabaseError as e:
+                print(e)
+                raise ValueError('Failed in getting the game info!')
+
+
 def get_all_games(page, max_num):  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
@@ -164,7 +179,7 @@ def delete_user_game(uid, gid):  # 还需要处理返回值
                 raise ValueError('Failed to delete the game!')
 
 
-def add_UserOwnGames(uID, gID):  # 还需要处理返回值
+def add_user_own_games(uID, gID):  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
@@ -176,12 +191,12 @@ def add_UserOwnGames(uID, gID):  # 还需要处理返回值
                 return 1
 
 
-def add_review(uID, gID, title, content, rating):  # 还需要处理返回值
+def add_review(uid, gid, title, content, rating):  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
                 rid = pymssql.output(int)
-                result = cursor.callproc('addReview', (uID, gID, title, content, rating, rid))
+                result = cursor.callproc('addReview', (uid, gid, title, content, rating, rid))
                 conn.commit()
                 return result[5]
             except pymssql.DatabaseError:
@@ -189,11 +204,11 @@ def add_review(uID, gID, title, content, rating):  # 还需要处理返回值
                 return 1
 
 
-def update_review(rID, title, content, rating):
+def update_review(rid, title, content, rating):
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
-                cursor.callproc('updateReview', (rID, title, content, rating))
+                cursor.callproc('updateReview', (rid, title, content, rating))
                 conn.commit()
                 return 0
             except pymssql.DatabaseError:
@@ -201,11 +216,11 @@ def update_review(rID, title, content, rating):
                 return 1
 
 
-def delete_review(rID):  # 还需要处理返回值
+def delete_review(rid):  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
-                cursor.callproc('deleteReview', (rID,))
+                cursor.callproc('deleteReview', (rid,))
                 conn.commit()
                 return 0
             except pymssql.DatabaseError:
@@ -213,7 +228,7 @@ def delete_review(rID):  # 还需要处理返回值
                 return 1
 
 
-def getUsersGames(uid):  # 还需要处理返回值
+def get_users_games(uid):  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
@@ -228,7 +243,7 @@ def getUsersGames(uid):  # 还需要处理返回值
                 return 1
 
 
-def getGamesByCategory(cid):  # 还需要处理返回值
+def get_games_by_category(cid):  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
@@ -243,7 +258,7 @@ def getGamesByCategory(cid):  # 还需要处理返回值
                 return 1
 
 
-def getBillingInfo(uid):  # 还需要处理返回值
+def get_billing_info(uid):  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
@@ -258,11 +273,11 @@ def getBillingInfo(uid):  # 还需要处理返回值
                 return 1
 
 
-def deleteBillingInfo(bID):  # 还需要处理返回值
+def delete_billing_info(bid):  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
-                cursor.callproc('deleteBillingInfo', (bID,))
+                cursor.callproc('deleteBillingInfo', (bid,))
                 conn.commit()
                 return 0
             except pymssql.DatabaseError:
@@ -270,12 +285,12 @@ def deleteBillingInfo(bID):  # 还需要处理返回值
                 return 1
 
 
-def addBillingInfo(CCNumber, NameOnCard, uID, ExpDate, SecurityCode):  # 还需要处理返回值
+def add_billing_info(cc_number, name_on_card, uid, expdate, security_code):  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:
                 bid = pymssql.output(int)
-                result = cursor.callproc('addBillingInfo', (CCNumber, NameOnCard, uID, ExpDate, SecurityCode, bid))
+                result = cursor.callproc('addBillingInfo', (cc_number, name_on_card, uid, expdate, security_code, bid))
                 conn.commit()
                 return result[5]
             except pymssql.DatabaseError:
@@ -283,7 +298,7 @@ def addBillingInfo(CCNumber, NameOnCard, uID, ExpDate, SecurityCode):  # 还需�
                 return 1
 
 
-def getSpecificReview(uid, gid):  # 还需要处理返回值
+def get_specific_review(uid, gid):  # 还需要处理返回值
     with db_connect() as conn:
         with conn.cursor(as_dict=True) as cursor:
             try:

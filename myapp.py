@@ -131,7 +131,8 @@ def add_game():  # 添加游戏
         download = data['download']
         price = data['price']
         release_date = data['releaseDate']
-        if name == '' or release_date == '' or price == '' or description == '' or download == '' or version == '':  # 非空检查
+        if name == '' or release_date == '' or price == '' or description == '' or download == '' or version == '':
+            # 非空检查
             status = 1
             msg = "Error: None of the input Can be NULL"
             response = jsonify({'status': status, 'msg': msg})
@@ -154,6 +155,27 @@ def add_game():  # 添加游戏
 
 
 @app.route('/getAllGames', methods=['GET', 'POST'])
+@cross_origin()
+def get_all_game():
+    try:
+        result = db.get_all_games_with_category()
+        status = 0
+        msg = "Success"
+        response = jsonify({'status': status, 'msg': msg, 'games': result})
+        return response
+    except (KeyError, TypeError):
+        status = -1
+        msg = "Error: Wrong Parameter!"
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+    except ValueError as e:
+        status = 1
+        msg = str(e)
+        response = jsonify({'status': status, 'msg': msg})
+        return response
+
+
+@app.route('/getAllGamesPage', methods=['GET', 'POST'])
 @cross_origin()
 def get_all_game():
     data = request.get_json()
@@ -213,18 +235,18 @@ def delete_game():
 
 @app.route('/addUserGame', methods=['GET', 'POST'])
 @cross_origin()
-def add_game_toUser():  # 添加游戏
+def add_game_to_user():  # 添加游戏
     data = request.get_json()
     try:
-        uID = data['uid']
-        gID = data['gID']
-        print(uID, gID)
-        if uID == '' or gID == '':  # 非空检查
+        uid = data['uid']
+        gid = data['gID']
+        print(uid, gid)
+        if uid == '' or gid == '':  # 非空检查
             status = 1
             msg = "Error: None of the input Can be NULL"
             response = jsonify({'status': status, 'msg': msg})
         else:
-            result = db.add_UserOwnGames(uID, gID)
+            result = db.add_user_own_games(uid, gid)
             if result == 0:  # 结果为0添加成功
                 status = 0
                 msg = "Add game to User successfully"
@@ -246,18 +268,18 @@ def add_game_toUser():  # 添加游戏
 def add_review():  # 添加游戏
     data = request.get_json()
     try:
-        uID = data['uid']
-        gID = data['gid']
+        uid = data['uid']
+        gid = data['gid']
         title = data['title']
         content = data['content']
         rating = data['rating']
-        print(uID, gID, content)
-        if uID == '' or gID == '' or title == '' or content == '' or rating == '':  # 非空检查
+        print(uid, gid, content)
+        if uid == '' or gid == '' or title == '' or content == '' or rating == '':  # 非空检查
             status = 1
             msg = "Error: None of the review input Can be NULL"
             response = jsonify({'status': status, 'msg': msg})
         else:
-            result = db.add_review(uID, gID, title, content, rating)
+            result = db.add_review(uid, gid, title, content, rating)
             if result != 1:  # 结果为0添加成功
                 status = 0
                 msg = "Add review successfully"
@@ -309,16 +331,14 @@ def delete_review():
 
 @app.route('/getUserReview', methods=['GET', 'POST'])
 @cross_origin()
-def getUserReview():
+def get_user_review():
     data = request.get_json()
     uid = data['uid']
     try:
         result = db.get_user_review(uid)
-
         status = 0
         msg = "Success"
         response = jsonify({'status': status, 'msg': msg, 'content': result})
-
         return response
     except (KeyError, TypeError) as e:
         status = -1
@@ -334,11 +354,9 @@ def get_user_profile():
     uid = data['uid']
     try:
         result = db.get_user_profile(uid)
-
         status = 0
         msg = "Success"
         response = jsonify({'status': status, 'msg': msg, 'content': result[0]})
-
         return response
     except (KeyError, TypeError) as e:
         status = -1
@@ -349,12 +367,12 @@ def get_user_profile():
 
 @app.route('/getSpecificReview', methods=['GET', 'POST'])
 @cross_origin()
-def getSpecificReview():
+def get_specific_review():
     data = request.get_json()
     uid = data['uid']
     gid = data['gid']
     try:
-        result = db.getSpecificReview(uid, gid)
+        result = db.get_specific_review(uid, gid)
 
         status = 0
         msg = "Success"
@@ -373,17 +391,17 @@ def getSpecificReview():
 def update_review():  #
     data = request.get_json()
     try:
-        rID = data['rid']
+        rid = data['rid']
         title = data['title']
         content = data['content']
         rating = data['rating']
-        print(rID, content)
-        if rID == '':
+        print(rid, content)
+        if rid == '':
             status = 1
             msg = "Error: review ID Cannot be NULL"
             response = jsonify({'status': status, 'msg': msg})
         else:
-            result = db.update_review(rID, title, content, rating)
+            result = db.update_review(rid, title, content, rating)
             if result == 0:  # 结果为0添加成功
                 status = 0
                 msg = "update review successfully"
@@ -416,11 +434,7 @@ def update_user_profile():  #
             msg = "Error: UserID Cannot be NULL"
             response = jsonify({'status': status, 'msg': msg})
         else:
-<<<<<<< HEAD
-            result = db.update_user_Profile(uid, address, email, phone, role)
-=======
             result = db.update_user_profile(uid, address, email, phone, role)
->>>>>>> b110829 (all)
             if result == 0:  # 结果为0添加成功
                 status = 0
                 msg = "update user profile successfully"
@@ -443,7 +457,7 @@ def get_user_game():
     data = request.get_json()
     uid = data['uid']
     try:
-        result = db.getUsersGames(uid)
+        result = db.get_users_games(uid)
         if result != 1:
             status = 0
             msg = "Success"
@@ -462,18 +476,18 @@ def get_user_game():
 
 @app.route('/addUserOwnGame', methods=['GET', 'POST'])
 @cross_origin()
-def addUserOwnGame():  # 添加游戏
+def add_user_own_game():  # 添加游戏
     data = request.get_json()
     try:
-        uID = data['uid']
-        gID = data['gid']
+        uid = data['uid']
+        gid = data['gid']
 
-        if uID == '' or gID == '':  # 非空检查
+        if uid == '' or gid == '':  # 非空检查
             status = 1
             msg = "Error: None of the review input Can be NULL"
             response = jsonify({'status': status, 'msg': msg})
         else:
-            result = db.add_UserOwnGames(uID, gID)
+            result = db.add_user_own_games(uid, gid)
             if result == 0:  # 结果为0添加成功
                 status = 0
                 msg = "purchase game successfully"
@@ -527,11 +541,11 @@ def delete_user_game():
 
 @app.route('/getGamesByCategory', methods=['GET', 'POST'])
 @cross_origin()
-def getGamesByCategory():
+def get_games_by_category():
     data = request.get_json()
     cid = data['cid']
     try:
-        result = db.getGamesByCategory(cid)
+        result = db.get_games_by_category(cid)
         if result != 1:
             status = 0
             msg = "Success to get Games by category"
@@ -551,11 +565,11 @@ def getGamesByCategory():
 
 @app.route('/getBillingInfoByUser', methods=['GET', 'POST'])
 @cross_origin()
-def getBillingInfoByUser():
+def get_billing_info_by_user():
     data = request.get_json()
     uid = data['uid']
     try:
-        result = db.getBillingInfo(uid)
+        result = db.get_billing_info(uid)
         if result != 1:
             status = 0
             msg = "Success to get Games by category"
@@ -575,7 +589,7 @@ def getBillingInfoByUser():
 
 @app.route('/deleteBillingInfo', methods=['GET', 'POST'])
 @cross_origin()
-def deleteBillingInfo():
+def delete_billing_info():
     data = request.get_json()
     try:
         bid = data['bid']
@@ -585,7 +599,7 @@ def deleteBillingInfo():
             msg = "Error: input Cannot be NULL"
             response = jsonify({'status': status, 'msg': msg})
         else:
-            result = db.deleteBillingInfo(bid)
+            result = db.delete_billing_info(bid)
             if result == 0:
                 status = 0
                 msg = "Success delete billingInfo"
@@ -609,22 +623,22 @@ def deleteBillingInfo():
 
 @app.route('/addBillingInfo', methods=['GET', 'POST'])
 @cross_origin()
-def addBillingInfo():  # 添加游戏
+def add_billing_info():  # 添加游戏
     data = request.get_json()
     try:
 
-        CCNumber = data['CCNumber']
-        NameOnCard = data['NameOnCard']
-        uID = data['uID']
-        ExpDate = data['ExpDate']
-        SecurityCode = data['SecurityCode']
+        cc_number = data['CCNumber']
+        name_on_card = data['NameOnCard']
+        uid = data['uID']
+        exp_date = data['ExpDate']
+        security_code = data['SecurityCode']
 
-        if uID == '' or CCNumber == '' or NameOnCard == '' or ExpDate == '' or SecurityCode == '':  # 非空检查
+        if uid == '' or cc_number == '' or name_on_card == '' or exp_date == '' or security_code == '':  # 非空检查
             status = 1
             msg = "Error: None of the review input Can be NULL"
             response = jsonify({'status': status, 'msg': msg})
         else:
-            result = db.addBillingInfo(CCNumber, NameOnCard, uID, ExpDate, SecurityCode)
+            result = db.add_billing_info(cc_number, name_on_card, uid, exp_date, security_code)
             if result != 1:  # 结果为0添加成功
                 status = 0
                 msg = "Add BillingInfo successfully"
@@ -639,8 +653,6 @@ def addBillingInfo():  # 添加游戏
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
-
-
 
 
 @app.route('/Data', methods=['GET', 'POST'])
