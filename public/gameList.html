@@ -377,7 +377,52 @@
     </div>
   </div>
 
-  
+
+
+  <!-- Add New Billing Info Modal -->
+  <div class="modal fade" id="addBillingInfoDialog" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Enter A Valid Billing Info:</h3>
+        </div>
+        <div class="container mt-3">
+          <div class="mb-3">
+            <label>Credit Card Number:</label>
+            <input type="text" class="form-control" id="CCNumber" placeholder="Enter Game Name">
+          </div>
+          <div class="mb-3">
+            <label>NameOnCard:</label>
+            <input type="text" class="form-control" id="NameOnCard" placeholder="Enter Game Description"
+              name="gameDesc">
+          </div>
+          <div class="mb-3 mt-3">
+            <label>Expiration Date:</label>
+            <input type="text" class="form-control" id="ExpDate" placeholder="Enter Version Number"
+              name="versionNo">
+          </div>
+          <div class="mb-3">
+            <label>CCV:</label>
+            <input type="text" class="form-control" id="SecurityCode" placeholder="Enter Publisher Name">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <div class="btn-space">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          </div>
+          <div class="btn-space">
+            <button id="submitAddBillingInfo" type="button" class="btn btn-primary btn-space" data-dismiss="modal">
+              Update
+            </button>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Verify CCV Modal -->
   <div class="modal" id="verifyCCVDialog" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -394,8 +439,8 @@
           <p>If you haven't added any Payment method, add one first!</p>
         </div>
         <div class="modal-footer">
-          <button id="ConfirmCCV" type="button" class="btn btn-primary" data-dismiss="modal">Confirm</button>
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button id="ConfirmCCV" type="button" class="btn btn-primary" data-dismiss="modal">Confirm</button>
         </div>
       </div>
     </div>

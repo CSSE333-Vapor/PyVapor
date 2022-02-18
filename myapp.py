@@ -590,6 +590,11 @@ def add_user_own_game(): # 添加游戏
         msg = str(e)
         response = jsonify({'status': status, 'msg': msg})
         return response
+    except ValueError as e:
+        status = 1
+        msg = str(e)
+        response = jsonify({'status': status, 'msg': msg})
+        return response
 
 
 @app.route('/deleteUserGame', methods=['GET', 'POST'])

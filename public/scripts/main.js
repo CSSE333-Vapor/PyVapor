@@ -1223,6 +1223,7 @@ rhit.GamesManager = class {
 				if(callback != null)
 					callback();
 			} else {
+				console.log("Wrong Parameter");
 				callback(1);
 			}
 		})
@@ -1490,6 +1491,14 @@ rhit.ListPageController = class {
 
 	updatePage(msg) {
 		if(msg == 1) {
+			const alartElem = htmlToElement(`
+			<div id="failedAlert" hidden class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+				<strong>Purchased Failed! </strong> Pleases check your Payment Information!
+				<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>`)
+		  	const c
 			document.querySelector("#failedAlert").hidden = "";
 		}
 		console.log("I need to update the list on the page!");
