@@ -549,6 +549,26 @@ rhit.RequestAPI = class {
 			})
 			.catch(error => console.log("Request failed", error));
 	}
+	async getAllCategory() {
+		return fetch(this._url + 'getAllCategory', {
+				method: 'POST',
+				headers: this._headers
+			})
+			.then(response => {
+				console.log("status is " + response.status);
+				return response.json();
+			})
+			.then(data => {
+				console.log(data);
+				if (data.status == 0) {
+					console.log(data.games);
+					return data.games;
+				} else {
+					console.log(data);
+				}
+			})
+			.catch(error => console.log("Request failed", error));
+	}
 
 	async deleteGame(gid) {
 		return fetch(this._url + 'deleteGame', {
