@@ -10,6 +10,8 @@
 
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
   <link rel="stylesheet" href="styles/bootstrap-material-design.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:300,400">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
   <link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/album/">
   <!-- Bootstrap core CSS -->
   <link href="styles/bootstrap.min.css" rel="stylesheet">
@@ -64,8 +66,9 @@
     <section class="py-5 text-center container">
       <div class="row py-lg-5">
         <div class="col-lg-6 col-md-8 mx-auto">
-          <h1 id="welcomeLabel" class="fw-light">Vapor - Game Center</h1>
-          <p class="lead text-muted">Something short and leading about the collection below—its contents, the creator,
+          <h1 id="gameName">Vapor - Game Center</h1>
+          <h3 id="gameVersion" class="fw-light">v1.0.0</h3>
+          <p id="gameDescription" class="lead text-muted">Something short and leading about the collection below—its contents, the creator,
             etc. Make it short and sweet, but not too short so folks don’t simply skip over it entirely.</p>
           <p>
             <button id="addNewGame" hidden="hidden" type="button" class="btn btn-primary my-2" data-toggle="modal"
@@ -86,49 +89,33 @@
 
     <div id="gamePage" class="album py-5 bg-light">
       <div class="container">
-        <div id="reviewContainer" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-
-          <div class="comment_block">
-            <div class="create_new_comment">
-              <div class="input_comment">
-                <input type="text" placeholder="Join the conversation..">
-              </div>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+          <div class="review-block">
+            <div class="new-review">
+                <input id="newReview" type="text" placeholder="Leave your review..">
             </div>
 
             <!-- new comment -->
-            <div class="new_comment">
+            <div id="reviewContainer">
               <!-- build comment -->
-              <ul class="user_comment">
+              <div class="review">
                 <!-- the comment body -->
-                <div class="comment_body">
+                <div class="review-body">
                   <h5>title</h5>
                   <p>Gastropub cardigan jean shorts, kogi Godard PBR&B lo-fi locavore. Organic chillwave vinyl Neutra.
                     Bushwick Helvetica cred freegan, crucifix Godard craft beer deep v mixtape cornhole Truffaut master
                     cleanse pour-over Odd Future beard. Portland polaroid iPhone.</p>
                 </div>
-
                 <!-- comments toolbar -->
-                <div class="comment_toolbar">
-
-                  <!-- inc. date and time -->
-                  <div class="comment_details">
-                    <ul>
-                      <li><i class="fa fa-pencil"></i> <span class="user">John Smith</span></li>
-                      <li><i class="fa fa-share-alt"></i></li>
-                      <li><i class="fa fa-reply"></i></li>
-                      <li><i class="fa fa-heart love"></i></li>
-                    </ul>
-                  </div>
-                  <!-- inc. share/reply and love -->
-                  <div class="comment_tools">
-                    <ul>
-
-                    </ul>
-                  </div>
-
+                <div class="review-toolbar">
+                  <ul>
+                    <li><i class="fa fa-clock-o"></i> 13:94</li>
+                    <li><i class="fa fa-calendar"></i> 04/01/2015</li>
+                    <li><i class="fa fa-pencil"></i> <span class="user">John Smith</span></li>
+                    <li><i class="fa fa-trash"></i></li>
+                  </ul>
                 </div>
-
-              </ul>
+              </div>
             </div>
           </div>
         </div>
