@@ -585,13 +585,14 @@ rhit.RequestAPI = class {
 			.catch(error => console.log("Request failed", error));
 	}
 
-	async addUserOwnGame(uid,gid) {
+	async addUserOwnGame(uid,gid,securityCode) {
 		return fetch(this._url + 'addUserOwnGame', {
 				method: 'POST',
 				headers: this._headers,
 				body: JSON.stringify({
 					'uid': uid,
-					'gid': gid
+					'gid': gid,
+					'securityCode':securityCode
 					
 				})
 			})
